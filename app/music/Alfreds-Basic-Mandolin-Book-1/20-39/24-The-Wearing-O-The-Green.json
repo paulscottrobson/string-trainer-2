@@ -1,0 +1,22 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"The Wearing O' the Green (Track 24)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "--d-8f---4-a--",
+              "-c--4-c--4-c--4-c--",
+              "-c--4-f--4-f--4-c--",
+              "-c--4-a--4-a--4-a--",
+              "-a--84-f--",
+              "--a-4-d--4--d-4--a-",
+              "--a-4-f--4-c--4f---",
+              "-a--4f---4f---4f---",
+              "f---"
+
+           ]
+}  

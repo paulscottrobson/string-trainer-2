@@ -1,0 +1,17 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Fourth String G (Track 19)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "",
+              "a---4a---4c---4c---",
+              "e---4e---4f---4f---",
+              "e---4c---4a---4e---",
+              "f---4c---4a---"
+
+           ]
+}  

@@ -1,0 +1,21 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Au Clair de la Lune (Track 23)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "--f-4--f-4--f-4---a",
+              "---c8---a",
+              "--f-4---c4---a4---a",
+              "--f-",
+              "a---4a---4a---4c---",
+              "e---8c---",
+              "a---4e---4c---4c---",
+              "a---8-f--"
+
+           ]
+}  

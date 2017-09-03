@@ -1,0 +1,25 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Rockin in Dorian Mode (Track 17)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "",
+              "--f-4--f-4---b4---d",
+              "---f4---d4---b4---d",
+              "--f-4--f-4--d-4--d-",
+              "--f-",
+              "--f-4--f-4---b4---d",
+              "---f4---d4---b4---d",
+              "--f-4--f-4--d-4--d-",
+              "--f-",
+              "--f-4--f-4--f-4--f-",
+              "---f",
+              "--a-4--a-4--a-4--a-",
+              "--f-"
+
+           ]
+}  

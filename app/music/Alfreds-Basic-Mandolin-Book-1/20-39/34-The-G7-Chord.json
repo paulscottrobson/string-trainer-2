@@ -1,0 +1,17 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"G7 Chord (Track 34)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "a---4-a--4--c-4---b",
+              "aacb8aacb",
+              "---c4--b-4-a--4a---",
+              "aacb8aacb"
+
+           ]
+}  

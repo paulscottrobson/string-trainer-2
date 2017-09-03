@@ -1,0 +1,16 @@
+{  
+   "author"      :"Traditional",
+   "beats"       :"4",
+   "tempo"       :"120",
+   "title"       :"Old Joe Clark",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "---a4---c4---d4---c",
+              "---a2---c2---a2--f-2--e-4--e-2--f-",
+              "---a2--e-2---a2---c2---d2---c2---d2---c",
+              "aacd"
+
+           ]
+}  

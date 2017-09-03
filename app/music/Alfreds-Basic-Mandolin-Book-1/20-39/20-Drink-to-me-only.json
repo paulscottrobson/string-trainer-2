@@ -1,0 +1,21 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"3",
+   "tempo"       :"100",
+   "title"       :"Drink to me only with thine eyes (Track 20)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "",
+              "e---4e---4e---",
+              "f---8f---",
+              "-a--4f---4e---",
+              "c---4e---4f---",
+              "-a--4a---4f---",
+              "e---8c---",
+              "a---",
+              "-f--"
+
+           ]
+}  

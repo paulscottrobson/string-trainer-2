@@ -1,0 +1,21 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Old MacDonald (Track 12)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "",
+              "-f--4-f--4-f--4-a--",
+              "-c--4-c--4-a--",
+              "--c-4--c-4--a-4--a-",
+              "-f--84-a--",
+              "-f--4-f--4-f--4-a--",
+              "-c--4-c--4-a--",
+              "--c-4--c-4--a-4--a-",
+              "-f--8---d"
+
+           ]
+}  

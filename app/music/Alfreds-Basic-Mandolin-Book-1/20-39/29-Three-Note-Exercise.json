@@ -1,0 +1,17 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"3",
+   "tempo"       :"100",
+   "title"       :"Three Note Exercise (Track 29)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "-a--4--a-4---a",
+              "-aaa8-aaa",
+              "---b4---d4---b",
+              "-aaa8-aaa"
+
+           ]
+}  

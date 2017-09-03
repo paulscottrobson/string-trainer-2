@@ -1,0 +1,17 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"G Chord (Track 38)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "a---4-a--4--c-4---d",
+              "aacd8aacd",
+              "---d4--c-4-a--4a---",
+              "aacd8aacd"
+
+           ]
+}  

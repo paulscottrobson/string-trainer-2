@@ -1,0 +1,21 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"3",
+   "tempo"       :"100",
+   "title"       :"Playing with E,F,G(Track 3)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "",
+              "---a4---a4---a",
+              "---b4---b4---b",
+              "---d4---d4---d",
+              "---b4---b4---b",
+              "---a4---a4---a",
+              "---b4---b4---b",
+              "---d4---a4---b",
+              "---d4---b4---a"
+
+           ]
+}  

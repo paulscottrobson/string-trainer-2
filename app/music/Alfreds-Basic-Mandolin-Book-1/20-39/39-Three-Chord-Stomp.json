@@ -1,0 +1,25 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Three Chord Stomp (Track 39)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "a---4-c--4-f--4----",
+              "acda4----4acda4----",
+              "aacd4aacd4aacb4aacb",
+              "acda4----4acda4----",
+              "-d--4--a-4--d-4--f-",
+              "--d-4--a-4---b4----",
+              "acda4acda4aacb4aacb",
+              "acda4----4acda4----",
+              "a---4e---4-a--4-c--",
+              "-f--4--c-4--f-4---a",
+              "aacd4aacd4aacb4aacb",
+              "acda4aacb4acda4----"
+
+           ]
+}  

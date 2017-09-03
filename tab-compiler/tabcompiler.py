@@ -183,3 +183,4 @@ md = MountainDulcimer()
 cm = Compiler()
 
 cm.compile(open("waterbound.tab"),sys.stdout,md)
+cm.compile(open("waterbound.tab"),open("../app/music.json","w"),md)

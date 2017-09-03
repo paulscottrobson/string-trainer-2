@@ -1,0 +1,21 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"First String E (Track 2)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "",
+              "---a4---a4---a4---a",
+              "---a4---a4---a4---a",
+              "---b4---b4---b4---b",
+              "---b4---b4---b4---b",
+              "---d4---d4---d4---d",
+              "---d4---d4---d4---d",
+              "---a4---a4---b4---b",
+              "---d4---d4---a"
+
+           ]
+}  

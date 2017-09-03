@@ -1,0 +1,17 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Four Note Exercise (Track 30)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "a---4-a--4--a-4---a",
+              "aaaa8aaaa4aaaa",
+              "---b4---b4---d4---b",
+              "aaaa8aaaa4aaaa"
+
+           ]
+}  

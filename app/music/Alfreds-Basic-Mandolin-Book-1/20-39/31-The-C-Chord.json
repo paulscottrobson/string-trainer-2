@@ -1,0 +1,17 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"C Chord (Track 31)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "a---4-c--4--d-4---a",
+              "acda8acda",
+              "---a4--d-4-c--4a---",
+              "acda8acda"
+
+           ]
+}  

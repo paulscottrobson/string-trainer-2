@@ -1,0 +1,29 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Love Somebody (Track 35)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "acda4---a4---d4---d",
+              "--f-4---a4aacb",
+              "acda4---a4---d4---d",
+              "aacb4---a4--f-4aacb",
+              "acda4---a4---d4---d",
+              "--f-4---a4aacb",
+              "acda4acda4--f-4--f-",
+              "acda4acda4acda",
+              "-f--4-c--4-f--4-c--",
+              "-f--4--d-4--d-4acda",
+              "-f--4-c--4-f--4-c--",
+              "-d--4-a--4-a--4aacb",
+              "-f--4-c--4-f--4-c--",
+              "-f--4--d-4--d-4--d-",
+              "acda4acda4--f-4--f-",
+              "acda4acda4acda"
+
+           ]
+}  

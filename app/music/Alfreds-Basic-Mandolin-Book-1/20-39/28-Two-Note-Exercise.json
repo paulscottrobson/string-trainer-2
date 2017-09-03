@@ -1,0 +1,17 @@
+{  
+   "author"      :"Alfred",
+   "beats"       :"4",
+   "tempo"       :"100",
+   "title"       :"Two Note Exercise (Track 28)",
+   "tuning"      :"g3,d4,a4,e5",
+   "type"        :"mandolin",
+   "version"     :"1",
+   "bars": [
+              "----",
+              "---a4--a-4--a-4---a",
+              "--aa8--aa",
+              "---b4---b4---d4---b",
+              "--aa"
+
+           ]
+}  
