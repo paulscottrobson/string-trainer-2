@@ -83,3 +83,4 @@ interface IMusic {
     getTuning():string[];
 
 }
+

@@ -18,14 +18,186 @@ var MainState = (function (_super) {
         bgr.width = this.game.width;
         bgr.height = this.game.height;
         var json = this.game.cache.getJSON("music");
-        console.log(json);
+        this.music = new Music(json);
     };
     MainState.prototype.destroy = function () {
+        this.music = null;
     };
     MainState.prototype.update = function () {
     };
     return MainState;
 }(Phaser.State));
+var Instrument = (function () {
+    function Instrument() {
+    }
+    Instrument.prototype.isLowestPitchAtBottom = function () {
+        return false;
+    };
+    Instrument.prototype.isDoubleString = function (str) {
+        return false;
+    };
+    Instrument.prototype.toDisplayFret = function (fret) {
+        return fret.toString();
+    };
+    return Instrument;
+}());
+var DiatonicInstrument = (function (_super) {
+    __extends(DiatonicInstrument, _super);
+    function DiatonicInstrument() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DiatonicInstrument.prototype.toDisplayFret = function (fret) {
+        var n = DiatonicInstrument.TODIATONIC[fret % 12];
+        n = n + Math.floor(fret / 12);
+        var display = Math.floor(n).toString();
+        if (n != Math.floor(n)) {
+            display = display + "+";
+        }
+        return display;
+    };
+    DiatonicInstrument.TODIATONIC = [
+        0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 6, 6.5
+    ];
+    return DiatonicInstrument;
+}(Instrument));
+var MountainDulcimer = (function (_super) {
+    __extends(MountainDulcimer, _super);
+    function MountainDulcimer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    MountainDulcimer.prototype.getDefaultTuning = function () {
+        return "d3,a3,d4";
+    };
+    MountainDulcimer.prototype.getStringCount = function () {
+        return 3;
+    };
+    MountainDulcimer.prototype.isLowestPitchAtBottom = function () {
+        return false;
+    };
+    MountainDulcimer.prototype.isDoubleString = function (str) {
+        return (str == 2);
+    };
+    return MountainDulcimer;
+}(DiatonicInstrument));
+var Ukulele = (function (_super) {
+    __extends(Ukulele, _super);
+    function Ukulele() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Ukulele.prototype.getDefaultTuning = function () {
+        return "g3,d4,a4,e4";
+    };
+    Ukulele.prototype.getStringCount = function () {
+        return 4;
+    };
+    return Ukulele;
+}(Instrument));
+var Mandolin = (function (_super) {
+    __extends(Mandolin, _super);
+    function Mandolin() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Mandolin.prototype.getDefaultTuning = function () {
+        return "g3,d3,a4,e5";
+    };
+    Mandolin.prototype.getStringCount = function () {
+        return 4;
+    };
+    Mandolin.prototype.isDoubleString = function (str) {
+        return true;
+    };
+    return Mandolin;
+}(Instrument));
+var MusicInfoItem;
+(function (MusicInfoItem) {
+    MusicInfoItem[MusicInfoItem["Title"] = 0] = "Title";
+    MusicInfoItem[MusicInfoItem["Composer"] = 1] = "Composer";
+    MusicInfoItem[MusicInfoItem["Translator"] = 2] = "Translator";
+    MusicInfoItem[MusicInfoItem["Instrument"] = 3] = "Instrument";
+    MusicInfoItem[MusicInfoItem["Tuning"] = 4] = "Tuning";
+})(MusicInfoItem || (MusicInfoItem = {}));
+var Music = (function () {
+    function Music(musicJSON) {
+        this.json = musicJSON;
+        this.barCount = 0;
+        this.bars = [];
+        this.beats = parseInt(this.json["beats"], 10);
+        this.tempo = parseInt(this.json["speed"], 10);
+        this.capo = parseInt(this.json["capo"], 10);
+        this.instrument = this.getInstrumentObject(this.json["instrument"]);
+        console.log(this.getInfo(MusicInfoItem.Tuning), this.capo, this.tempo, this.getTuning());
+        console.log(this.instrument.getDefaultTuning());
+    }
+    Music.prototype.destroy = function () {
+        this.json = null;
+    };
+    Music.prototype.getInfo = function (info) {
+        var rInfo = "";
+        switch (info) {
+            case MusicInfoItem.Composer:
+                rInfo = this.json["composer"];
+                break;
+            case MusicInfoItem.Instrument:
+                rInfo = this.json["instrument"];
+                break;
+            case MusicInfoItem.Title:
+                rInfo = this.json["title"];
+                break;
+            case MusicInfoItem.Translator:
+                rInfo = this.json["translator"];
+                break;
+            case MusicInfoItem.Tuning:
+                rInfo = this.json["tuning"];
+                break;
+            default:
+                throw new Error("Not implemented.");
+        }
+        return rInfo;
+    };
+    Music.prototype.getBarCount = function () {
+        return this.barCount;
+    };
+    Music.prototype.getBar = function (bar) {
+        return this.bars[bar];
+    };
+    Music.prototype.getBeats = function () {
+        return this.beats;
+    };
+    Music.prototype.getTempo = function () {
+        return this.tempo;
+    };
+    Music.prototype.getCapoPosition = function () {
+        return this.capo;
+    };
+    Music.prototype.getInstrument = function () {
+        return this.instrument;
+    };
+    Music.prototype.getTuning = function () {
+        var tuning = this.json["tuning"];
+        if (tuning != "") {
+            tuning = this.instrument.getDefaultTuning();
+        }
+        return tuning.toLowerCase().split(",");
+    };
+    Music.prototype.getInstrumentObject = function (name) {
+        var iObj = null;
+        switch (name) {
+            case "dulcimer":
+                iObj = new MountainDulcimer();
+                break;
+            case "ukulele":
+                iObj = new Ukulele();
+                break;
+            case "mandolin":
+                iObj = new Mandolin();
+                break;
+            default:
+                throw new Error("Not implemented.");
+        }
+        return iObj;
+    };
+    return Music;
+}());
 window.onload = function () {
     var game = new StringTrainerApplication();
 };
