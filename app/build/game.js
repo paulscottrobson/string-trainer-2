@@ -19,6 +19,8 @@ var MainState = (function (_super) {
         bgr.height = this.game.height;
         var json = this.game.cache.getJSON("music");
         this.music = new Music(json);
+        var rdr = new StringRenderer(this.game, this.music.getBar(0), this.music.getInstrument(), 600, 300);
+        rdr.moveTo(100, 100);
     };
     MainState.prototype.destroy = function () {
         this.music = null;
@@ -352,3 +354,126 @@ var PreloadState = (function (_super) {
     PreloadState.NOTE_COUNT = 48;
     return PreloadState;
 }(Phaser.State));
+var BaseRenderer = (function (_super) {
+    __extends(BaseRenderer, _super);
+    function BaseRenderer(game, bar, instrument, width, height) {
+        var _this = _super.call(this, game) || this;
+        _this.isDrawn = false;
+        _this.rWidth = width;
+        _this.rHeight = height;
+        _this.bar = bar;
+        _this.instrument = instrument;
+        _this.xiLast = _this.yiLast = -999999;
+        _this.debugRectangle = null;
+        _this.debugRectangle = _this.game.add.image(0, 0, "sprites", "rectangle", _this);
+        _this.debugRectangle.width = width;
+        _this.debugRectangle.height = height;
+        _this.debugRectangle.alpha = 0.3;
+        return _this;
+    }
+    BaseRenderer.prototype.moveTo = function (x, y) {
+        x = Math.round(x);
+        y = Math.round(y);
+        if (x == this.xiLast && y == this.yiLast)
+            return;
+        if (x > this.game.height || x + this.rWidth < 0 ||
+            y > this.game.width || y + this.rHeight < 0) {
+            if (this.isDrawn) {
+                this.eraseAllObjects();
+                if (this.debugRectangle != null) {
+                    this.debugRectangle.visible = false;
+                }
+                this.isDrawn = false;
+            }
+            return;
+        }
+        if (!this.isDrawn) {
+            this.drawAllObjects();
+            if (this.debugRectangle != null) {
+                this.debugRectangle.visible = true;
+            }
+            this.isDrawn = true;
+        }
+        this.moveAllObjects(x, y);
+        if (this.debugRectangle != null) {
+            this.debugRectangle.x = x;
+            this.debugRectangle.y = y;
+        }
+        this.xiLast = x;
+        this.yiLast = y;
+    };
+    BaseRenderer.prototype.destroy = function () {
+        if (this.isDrawn) {
+            this.eraseAllObjects();
+            this.isDrawn = false;
+        }
+        if (this.debugRectangle != null) {
+            this.debugRectangle.destroy();
+        }
+        _super.prototype.destroy.call(this);
+    };
+    return BaseRenderer;
+}(Phaser.Group));
+var TestRenderer = (function (_super) {
+    __extends(TestRenderer, _super);
+    function TestRenderer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    TestRenderer.prototype.moveAllObjects = function (x, y) {
+        this.img.x = x;
+        this.img.y = y;
+    };
+    TestRenderer.prototype.drawAllObjects = function () {
+        this.img = this.game.add.image(0, 0, "sprites", "sphere_green", this);
+        this.img.width = this.rWidth;
+        this.img.height = this.rHeight;
+    };
+    TestRenderer.prototype.eraseAllObjects = function () {
+        this.img.destroy();
+        this.img = null;
+    };
+    return TestRenderer;
+}(BaseRenderer));
+var StringRendererFactory = (function () {
+    function StringRendererFactory() {
+    }
+    StringRendererFactory.prototype.getRenderManager = function () {
+        throw new Error("Method not implemented.");
+    };
+    StringRendererFactory.prototype.getRenderer = function (game, instrument, bar) {
+        throw new Error("Method not implemented.");
+    };
+    return StringRendererFactory;
+}());
+var StrumMarker = (function (_super) {
+    __extends(StrumMarker, _super);
+    function StrumMarker(game, sText, width, height, tint) {
+        var _this = _super.call(this, game) || this;
+        var gfxName = "rr" + _this.selectGraphicFrame(width / height).toString();
+        var frame = _this.game.add.image(0, 0, "sprites", gfxName, _this);
+        frame.width = width;
+        frame.height = height;
+        frame.anchor.x = frame.anchor.y = 0.5;
+        frame.tint = tint;
+        var text = _this.game.add.bitmapText(0, 0, "font", sText, height * 65 / 100, _this);
+        text.anchor.x = 0.5;
+        text.anchor.y = 0.4;
+        text.tint = 0xFFFFFF;
+        _this.cacheAsBitmap = true;
+        return _this;
+    }
+    StrumMarker.prototype.selectGraphicFrame = function (aspect) {
+        var bestGraphic = 1;
+        var bestDifference = 99999;
+        for (var g = 1; g <= StrumMarker.BOXRATIO.length; g++) {
+            var diff = Math.abs(aspect - StrumMarker.BOXRATIO[g]);
+            if (diff < bestDifference) {
+                bestGraphic = g;
+                bestDifference = diff;
+            }
+        }
+        return bestGraphic;
+    };
+    StrumMarker.BOXRATIO = [0, 102 / 50, 124 / 50, 152 / 50, 183 / 50, 199 / 50, 75 / 50, 50 / 50, 250 / 50];
+    return StrumMarker;
+}(Phaser.Group));

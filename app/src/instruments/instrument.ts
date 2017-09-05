@@ -69,4 +69,3 @@ abstract class DiatonicStringInstrument extends StringInstrument {
         return display;
     }
 }
-
