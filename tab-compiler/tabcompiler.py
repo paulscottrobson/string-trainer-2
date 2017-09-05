@@ -71,7 +71,7 @@ class Note:
 		return Note.TOCHROMATIC[pos % 7] + int(pos / 7) * 12
 
 	def render(self):
-		return "".join(["{0:02}".format(x if x >= 0 else 99) for x in self.fretting])+":"+"{0:02}".format(self.qbLength)
+		return "".join([chr(x+97) if x >= 0 else "-" for x in self.fretting])+":"+chr(self.qbLength+97)
 
 Note.FRETS = "&0123456789TLWHUVX"											# identifiers for frets -1 .. 16
 
@@ -170,10 +170,10 @@ class Compiler:
 		keys.sort()
 		streamOut.write("{\n")
 		for k in keys:														# render assignments
-			streamOut.write('"{0}":"{1}",\n'.format(k,self.assignments[k]))
-		streamOut.write('"bars":[\n')										# render bars
-		streamOut.write(",\n".join(['"'+x.render()+'"' for x in self.bars]))
-		streamOut.write("\n]\n}\n")
+			streamOut.write('    "{0}":"{1}",\n'.format(k,self.assignments[k]))
+		streamOut.write('    "bars":[\n')									# render bars
+		streamOut.write(",\n".join(['        "'+x.render()+'"' for x in self.bars]))
+		streamOut.write("\n    ]\n}\n")
 
 		 	
 Compiler.DEFAULTS = { 	"beats":"4","speed":"100", "title":"unknown", \

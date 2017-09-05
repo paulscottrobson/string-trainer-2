@@ -48,4 +48,22 @@ interface IInstrument {
      * @memberof IInstrument
      */
     toDisplayFret(fret:number):string;
+
+    /**
+     * Is the instrument continuous (i.e. the sound needs to be cut off at its end)
+     * so a Harmonica will keep playing as long as you blow through it, but a strummed
+     * string will die away naturally.
+     * 
+     * @returns {boolean} 
+     * @memberof IInstrument
+     */
+    isContinuous():boolean;
+
+    /**
+     * Get factory for creating renderers/managers for this instrument.
+     * 
+     * @returns {IRendererFactory} 
+     * @memberof IInstrument
+     */
+    getRendererFactory(): IRendererFactory;
 }

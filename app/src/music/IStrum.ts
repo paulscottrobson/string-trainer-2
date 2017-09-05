@@ -25,7 +25,7 @@ interface IStrum {
     /**
      * Get the start time of the strum in the bar
      * 
-     * @returns {number} start time in millibars
+     * @returns {number} start time in quarter Beats
      * @memberof IStrum
      */
     getStartTime():number;
@@ -33,7 +33,7 @@ interface IStrum {
     /**
      * Get the end time of the strum in the bar
      * 
-     * @returns {number} end time in millibars
+     * @returns {number} end time in quarter Beats
      * @memberof IStrum
      */
     getEndTime():number;
@@ -41,7 +41,7 @@ interface IStrum {
     /**
      * Get the duration of the strum 
      * 
-     * @returns {number} duration in millibars
+     * @returns {number} duration in quarter Beats
      * @memberof IStrum
      */
     getLength():number;

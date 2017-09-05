@@ -30,6 +30,9 @@ var MainState = (function (_super) {
 var Instrument = (function () {
     function Instrument() {
     }
+    Instrument.prototype.isContinuous = function () {
+        return false;
+    };
     Instrument.prototype.isLowestPitchAtBottom = function () {
         return false;
     };
@@ -41,13 +44,23 @@ var Instrument = (function () {
     };
     return Instrument;
 }());
-var DiatonicInstrument = (function (_super) {
-    __extends(DiatonicInstrument, _super);
-    function DiatonicInstrument() {
+var StringInstrument = (function (_super) {
+    __extends(StringInstrument, _super);
+    function StringInstrument() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    DiatonicInstrument.prototype.toDisplayFret = function (fret) {
-        var n = DiatonicInstrument.TODIATONIC[fret % 12];
+    StringInstrument.prototype.getRendererFactory = function () {
+        return new StringRendererFactory();
+    };
+    return StringInstrument;
+}(Instrument));
+var DiatonicStringInstrument = (function (_super) {
+    __extends(DiatonicStringInstrument, _super);
+    function DiatonicStringInstrument() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DiatonicStringInstrument.prototype.toDisplayFret = function (fret) {
+        var n = DiatonicStringInstrument.TODIATONIC[fret % 12];
         n = n + Math.floor(fret / 12);
         var display = Math.floor(n).toString();
         if (n != Math.floor(n)) {
@@ -55,11 +68,11 @@ var DiatonicInstrument = (function (_super) {
         }
         return display;
     };
-    DiatonicInstrument.TODIATONIC = [
+    DiatonicStringInstrument.TODIATONIC = [
         0, 0.5, 1, 1.5, 2, 3, 3.5, 4, 4.5, 5, 6, 6.5
     ];
-    return DiatonicInstrument;
-}(Instrument));
+    return DiatonicStringInstrument;
+}(StringInstrument));
 var MountainDulcimer = (function (_super) {
     __extends(MountainDulcimer, _super);
     function MountainDulcimer() {
@@ -78,20 +91,7 @@ var MountainDulcimer = (function (_super) {
         return (str == 2);
     };
     return MountainDulcimer;
-}(DiatonicInstrument));
-var Ukulele = (function (_super) {
-    __extends(Ukulele, _super);
-    function Ukulele() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Ukulele.prototype.getDefaultTuning = function () {
-        return "g3,d4,a4,e4";
-    };
-    Ukulele.prototype.getStringCount = function () {
-        return 4;
-    };
-    return Ukulele;
-}(Instrument));
+}(DiatonicStringInstrument));
 var Mandolin = (function (_super) {
     __extends(Mandolin, _super);
     function Mandolin() {
@@ -107,7 +107,20 @@ var Mandolin = (function (_super) {
         return true;
     };
     return Mandolin;
-}(Instrument));
+}(StringInstrument));
+var Ukulele = (function (_super) {
+    __extends(Ukulele, _super);
+    function Ukulele() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Ukulele.prototype.getDefaultTuning = function () {
+        return "g3,d4,a4,e4";
+    };
+    Ukulele.prototype.getStringCount = function () {
+        return 4;
+    };
+    return Ukulele;
+}(StringInstrument));
 var MusicInfoItem;
 (function (MusicInfoItem) {
     MusicInfoItem[MusicInfoItem["Title"] = 0] = "Title";
@@ -116,6 +129,41 @@ var MusicInfoItem;
     MusicInfoItem[MusicInfoItem["Instrument"] = 3] = "Instrument";
     MusicInfoItem[MusicInfoItem["Tuning"] = 4] = "Tuning";
 })(MusicInfoItem || (MusicInfoItem = {}));
+var Bar = (function () {
+    function Bar(def, beats, instrument, barNumber) {
+        this.barNumber = barNumber;
+        this.beats = beats;
+        this.strums = [];
+        this.strumCount = 0;
+        var qbTime = 0;
+        var currentLabel = "";
+        for (var _i = 0, _a = def.split(";"); _i < _a.length; _i++) {
+            var strumDef = _a[_i];
+            if (strumDef[0] == '[') {
+                currentLabel = strumDef.substr(1, strumDef.length - 2);
+            }
+            else {
+                var strum = new Strum(strumDef, instrument, qbTime, currentLabel);
+                this.strums.push(strum);
+                this.strumCount++;
+                qbTime = qbTime + strum.getLength();
+            }
+        }
+    }
+    Bar.prototype.getBarNumber = function () {
+        return this.barNumber;
+    };
+    Bar.prototype.getStrumCount = function () {
+        return this.strumCount;
+    };
+    Bar.prototype.getStrum = function (strum) {
+        return this.strums[strum];
+    };
+    Bar.prototype.getBeats = function () {
+        return this.beats;
+    };
+    return Bar;
+}());
 var Music = (function () {
     function Music(musicJSON) {
         this.json = musicJSON;
@@ -125,8 +173,11 @@ var Music = (function () {
         this.tempo = parseInt(this.json["speed"], 10);
         this.capo = parseInt(this.json["capo"], 10);
         this.instrument = this.getInstrumentObject(this.json["instrument"]);
-        console.log(this.getInfo(MusicInfoItem.Tuning), this.capo, this.tempo, this.getTuning());
-        console.log(this.instrument.getDefaultTuning());
+        for (var _i = 0, _a = this.json["bars"]; _i < _a.length; _i++) {
+            var barDef = _a[_i];
+            this.bars.push(new Bar(barDef, this.beats, this.instrument, this.barCount));
+            this.barCount++;
+        }
     }
     Music.prototype.destroy = function () {
         this.json = null;
@@ -197,6 +248,40 @@ var Music = (function () {
         return iObj;
     };
     return Music;
+}());
+var Strum = (function () {
+    function Strum(strumDef, instrument, startTime, label) {
+        this.stringCount = instrument.getStringCount();
+        this.startTime = startTime;
+        this.label = label;
+        this.qbLength = strumDef.charCodeAt(this.stringCount + 1) - 97;
+        this.fretting = [];
+        for (var n = 0; n < this.stringCount; n++) {
+            var c = strumDef.charCodeAt(n);
+            c = (c == 45) ? Strum.NOSTRUM : c - 97;
+            this.fretting.push(c);
+        }
+    }
+    Strum.prototype.getStringCount = function () {
+        return this.stringCount;
+    };
+    Strum.prototype.getFretPosition = function (stringNumber) {
+        return this.fretting[stringNumber];
+    };
+    Strum.prototype.getStartTime = function () {
+        return this.startTime;
+    };
+    Strum.prototype.getEndTime = function () {
+        return this.startTime + this.qbLength;
+    };
+    Strum.prototype.getLength = function () {
+        return this.qbLength;
+    };
+    Strum.prototype.getLabel = function () {
+        return this.label;
+    };
+    Strum.NOSTRUM = -1;
+    return Strum;
 }());
 window.onload = function () {
     var game = new StringTrainerApplication();

@@ -1,20 +1,20 @@
 {
-"beats":"4",
-"capo":"0",
-"composer":"classical",
-"instrument":"dulcimer",
-"speed":"120",
-"title":"waterbound",
-"translator":"unknown",
-"tuning":"d3,a3,a3",
-"bars":[
-"070009:04;070007:04;040005:04;040005:02;040005:02",
-"070009:04;070007:04;040005:04;999999:04",
-"070007:04;070007:04;070009:04;070009:02;070009:02",
-"050005:04;050002:04;000000:08",
-"000000:04;000002:04;000005:04;000005:02;000005:02",
-"000509:04;000912:04;001014:04;001014:04",
-"000912:04;000509:04;070007:04;070007:02;070007:02",
-"000005:08;000005:08"
-]
+    "beats":"4",
+    "capo":"0",
+    "composer":"classical",
+    "instrument":"dulcimer",
+    "speed":"120",
+    "title":"waterbound",
+    "translator":"unknown",
+    "tuning":"d3,a3,a3",
+    "bars":[
+        "haj:e;hah:e;eaf:e;eaf:c;eaf:c",
+        "haj:e;hah:e;eaf:e;---:e",
+        "hah:e;hah:e;haj:e;haj:c;haj:c",
+        "faf:e;fac:e;aaa:i",
+        "aaa:e;aac:e;aaf:e;aaf:c;aaf:c",
+        "afj:e;ajm:e;ako:e;ako:e",
+        "ajm:e;afj:e;hah:e;[fin];hah:c;hah:c",
+        "aaf:i;aaf:i"
+    ]
 }

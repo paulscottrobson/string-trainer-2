@@ -7,7 +7,7 @@
  * @class MountainDulcimer
  * @implements {IInstrument}
  */
-class MountainDulcimer extends DiatonicInstrument {
+class MountainDulcimer extends DiatonicStringInstrument {
 
     // Okay, so not always right, but this or d3,a3,a3.
     getDefaultTuning(): string {    
@@ -30,37 +30,3 @@ class MountainDulcimer extends DiatonicInstrument {
     }
 }
 
-/**
- * Another example, a Ukulele (standard tuning)
- * 
- * @class Ukulele
- * @extends {Instrument}
- */
-class Ukulele extends Instrument {
-
-    getDefaultTuning(): string {
-        return "g3,d4,a4,e4";
-    }
-    getStringCount(): number {
-        return 4;
-    }
-}
-
-/**
- * Mandolin.
- * 
- * @class Mandolin
- * @implements {IInstrument}
- */
-class Mandolin extends Instrument {
-
-    getDefaultTuning(): string {
-        return "g3,d3,a4,e5";
-    }
-    getStringCount(): number {
-        return 4;
-    }
-    isDoubleString(str: number): boolean {
-        return true;
-    }
-}
