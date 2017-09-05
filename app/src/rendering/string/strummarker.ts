@@ -27,7 +27,7 @@ class StrumMarker extends Phaser.Group {
         frame.anchor.x = frame.anchor.y = 0.5;frame.tint = tint;
         // Background
         var text:Phaser.BitmapText = this.game.add.bitmapText(0,0,"font",sText,height*65/100,this);
-        text.anchor.x = 0.5;text.anchor.y = 0.4;text.tint = 0xFFFFFF;
+        text.anchor.x = 0.5;text.anchor.y = 0.4;text.tint = 0;
         // It doesn't change now.
         this.cacheAsBitmap = true;
     }

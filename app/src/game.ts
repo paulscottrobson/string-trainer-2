@@ -14,7 +14,7 @@ class MainState extends Phaser.State {
 
         var rdr:IRenderer = new StringRenderer(this.game,this.music.getBar(0),
                                                this.music.getInstrument(),600,300);
-        rdr.moveTo(100,100);        
+        rdr.moveTo(110,110);        
         //rdr.destroy();                                                
     }
 

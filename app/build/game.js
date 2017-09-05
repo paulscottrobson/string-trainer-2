@@ -20,7 +20,7 @@ var MainState = (function (_super) {
         var json = this.game.cache.getJSON("music");
         this.music = new Music(json);
         var rdr = new StringRenderer(this.game, this.music.getBar(0), this.music.getInstrument(), 600, 300);
-        rdr.moveTo(100, 100);
+        rdr.moveTo(110, 110);
     };
     MainState.prototype.destroy = function () {
         this.music = null;
@@ -434,6 +434,56 @@ var TestRenderer = (function (_super) {
     };
     return TestRenderer;
 }(BaseRenderer));
+var StringRenderer = (function (_super) {
+    __extends(StringRenderer, _super);
+    function StringRenderer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    StringRenderer.prototype.moveAllObjects = function (x, y) {
+        var beats = this.bar.getBeats();
+        var midx = 0;
+        for (var n = 0; n < this.bar.getStrumCount(); n++) {
+            var strum = this.bar.getStrum(n);
+            var xPos = (strum.getStartTime() + strum.getLength() / 2) * this.rWidth / (4 * beats);
+            for (var str = 0; str < this.instrument.getStringCount(); str++) {
+                var fret = strum.getFretPosition(str);
+                if (fret != Strum.NOSTRUM) {
+                    this.markerList[midx].x = x + xPos;
+                    this.markerList[midx].y = y + (str + 0.5) * this.rHeight / (this.instrument.getStringCount());
+                    midx++;
+                }
+            }
+        }
+    };
+    StringRenderer.prototype.drawAllObjects = function () {
+        this.markerList = [];
+        var beats = this.bar.getBeats();
+        var objHeight = this.rHeight / (this.instrument.getStringCount()) * 0.9;
+        for (var n = 0; n < this.bar.getStrumCount(); n++) {
+            var strum = this.bar.getStrum(n);
+            var objWidth = this.rWidth * strum.getLength() / (4 * beats) * 0.95;
+            for (var str = 0; str < this.instrument.getStringCount(); str++) {
+                var fret = strum.getFretPosition(str);
+                if (fret != Strum.NOSTRUM) {
+                    var colour = StringRenderer._colours[fret % StringRenderer._colours.length];
+                    var fName = this.instrument.toDisplayFret(fret);
+                    var sm = new StrumMarker(this.game, fName, objWidth, objHeight, colour);
+                    this.markerList.push(sm);
+                }
+            }
+        }
+    };
+    StringRenderer.prototype.eraseAllObjects = function () {
+        for (var _i = 0, _a = this.markerList; _i < _a.length; _i++) {
+            var img = _a[_i];
+            img.destroy();
+        }
+        this.markerList = null;
+    };
+    StringRenderer._colours = [0xFF0000, 0x00FF00, 0x0040FF, 0xFFFF00, 0x00FFFF, 0xFF00FF, 0xFF8000,
+        0x808080, 0xFFFFFF, 0x8B4513];
+    return StringRenderer;
+}(BaseRenderer));
 var StringRendererFactory = (function () {
     function StringRendererFactory() {
     }
@@ -458,7 +508,7 @@ var StrumMarker = (function (_super) {
         var text = _this.game.add.bitmapText(0, 0, "font", sText, height * 65 / 100, _this);
         text.anchor.x = 0.5;
         text.anchor.y = 0.4;
-        text.tint = 0xFFFFFF;
+        text.tint = 0;
         _this.cacheAsBitmap = true;
         return _this;
     }
