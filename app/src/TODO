@@ -1,7 +1,7 @@
-1. Render Sine Wave
-2. Position ball on Sine Wave 
-3. Write render manager and animate.
-4. Add background to render manager.
-5. Player object
-6. Button object
-
+Add bars to string renderer.
+Animate render manager
+Add background to render manager.
+Position ball on Sine Wave 
+Player object
+Button object
+Complete GUI

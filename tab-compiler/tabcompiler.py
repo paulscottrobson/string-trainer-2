@@ -71,7 +71,7 @@ class Note:
 		return Note.TOCHROMATIC[pos % 7] + int(pos / 7) * 12
 
 	def render(self):
-		return "".join([chr(x+97) if x >= 0 else "-" for x in self.fretting])+":"+chr(self.qbLength+97)
+		return "".join(["{0:02}".format(x if x >= 0 else 99) for x in self.fretting])+":"+"{0:02}".format(self.qbLength)
 
 Note.FRETS = "&0123456789TLWHUVX"											# identifiers for frets -1 .. 16
 

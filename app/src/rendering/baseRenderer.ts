@@ -23,6 +23,8 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
     private xiLast:number;
     private yiLast:number;
 
+    private static SHOW_DEBUG:boolean = true;
+
     abstract moveAllObjects(x:number,y:number): void;
     abstract drawAllObjects(); void;
     abstract eraseAllObjects(): void;
@@ -45,10 +47,12 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
         this.bar = bar;this.instrument = instrument;
         this.xiLast = this.yiLast = -999999;
         this.debugRectangle = null;
-        // Uncomment these to show enclosing rectangle
-        this.debugRectangle = this.game.add.image(0,0,"sprites","rectangle",this);
-        this.debugRectangle.width = width;this.debugRectangle.height = height;
-        this.debugRectangle.alpha = 0.3;
+        if (BaseRenderer.SHOW_DEBUG) {
+            this.debugRectangle = this.game.add.image(0,0,"sprites","rectangle",this);
+            this.debugRectangle.width = width;this.debugRectangle.height = height;
+            this.debugRectangle.alpha = 0.3;this.debugRectangle.visible = false;
+            this.debugRectangle.tint = Math.floor(Math.random() * 0x1000000);
+        }
     }
 
     moveTo(x:number,y:number): void {
@@ -57,8 +61,8 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
         if (x == this.xiLast && y == this.yiLast) return;
 
         // Is it off the screen ?
-        if (x > this.game.height || x+this.rWidth < 0 || 
-            y > this.game.width || y+this.rHeight < 0) {
+        if (x > this.game.width || x+this.rWidth < 0 || 
+            y > this.game.height || y+this.rHeight < 0) {
             // If object is drawn, remove it as not needed.
             if (this.isDrawn) {
                 this.eraseAllObjects();

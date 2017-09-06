@@ -19,8 +19,7 @@ var MainState = (function (_super) {
         bgr.height = this.game.height;
         var json = this.game.cache.getJSON("music");
         this.music = new Music(json);
-        var rdr = new StringRenderer(this.game, this.music.getBar(0), this.music.getInstrument(), 600, 300);
-        rdr.moveTo(110, 110);
+        var rndm = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
     };
     MainState.prototype.destroy = function () {
         this.music = null;
@@ -256,11 +255,11 @@ var Strum = (function () {
         this.stringCount = instrument.getStringCount();
         this.startTime = startTime;
         this.label = label;
-        this.qbLength = strumDef.charCodeAt(this.stringCount + 1) - 97;
+        this.qbLength = parseInt(strumDef.substr(-2), 10);
         this.fretting = [];
         for (var n = 0; n < this.stringCount; n++) {
-            var c = strumDef.charCodeAt(n);
-            c = (c == 45) ? Strum.NOSTRUM : c - 97;
+            var c = parseInt(strumDef.substr(n * 2, 2), 10);
+            c = (c == 99) ? Strum.NOSTRUM : c;
             this.fretting.push(c);
         }
     }
@@ -354,6 +353,38 @@ var PreloadState = (function (_super) {
     PreloadState.NOTE_COUNT = 48;
     return PreloadState;
 }(Phaser.State));
+var BaseRenderManager = (function (_super) {
+    __extends(BaseRenderManager, _super);
+    function BaseRenderManager(game, instrument, music) {
+        var _this = _super.call(this, game) || this;
+        _this.instrument = instrument;
+        _this.music = music;
+        _this.drawBackground();
+        var factory = instrument.getRendererFactory();
+        _this.renderers = [];
+        for (var bar = 0; bar < music.getBarCount(); bar++) {
+            var rnd = factory.getRenderer(game, instrument, music.getBar(bar), _this.getBoxWidth(), _this.getBoxHeight());
+            _this.renderers.push(rnd);
+        }
+        _this.updatePosition(0);
+        return _this;
+    }
+    BaseRenderManager.prototype.updatePosition = function (fracPos) {
+        for (var bar = 0; bar < this.music.getBarCount(); bar++) {
+            this.renderers[bar].moveTo(this.getXBox(fracPos, bar), this.getYBox(fracPos, bar));
+        }
+    };
+    BaseRenderManager.prototype.destroy = function () {
+        for (var _i = 0, _a = this.renderers; _i < _a.length; _i++) {
+            var rnd = _a[_i];
+            rnd.destroy();
+        }
+        this.eraseBackground();
+        _super.prototype.destroy.call(this);
+        this.renderers = this.instrument = this.music = null;
+    };
+    return BaseRenderManager;
+}(Phaser.Group));
 var BaseRenderer = (function (_super) {
     __extends(BaseRenderer, _super);
     function BaseRenderer(game, bar, instrument, width, height) {
@@ -365,10 +396,14 @@ var BaseRenderer = (function (_super) {
         _this.instrument = instrument;
         _this.xiLast = _this.yiLast = -999999;
         _this.debugRectangle = null;
-        _this.debugRectangle = _this.game.add.image(0, 0, "sprites", "rectangle", _this);
-        _this.debugRectangle.width = width;
-        _this.debugRectangle.height = height;
-        _this.debugRectangle.alpha = 0.3;
+        if (BaseRenderer.SHOW_DEBUG) {
+            _this.debugRectangle = _this.game.add.image(0, 0, "sprites", "rectangle", _this);
+            _this.debugRectangle.width = width;
+            _this.debugRectangle.height = height;
+            _this.debugRectangle.alpha = 0.3;
+            _this.debugRectangle.visible = false;
+            _this.debugRectangle.tint = Math.floor(Math.random() * 0x1000000);
+        }
         return _this;
     }
     BaseRenderer.prototype.moveTo = function (x, y) {
@@ -376,8 +411,8 @@ var BaseRenderer = (function (_super) {
         y = Math.round(y);
         if (x == this.xiLast && y == this.yiLast)
             return;
-        if (x > this.game.height || x + this.rWidth < 0 ||
-            y > this.game.width || y + this.rHeight < 0) {
+        if (x > this.game.width || x + this.rWidth < 0 ||
+            y > this.game.height || y + this.rHeight < 0) {
             if (this.isDrawn) {
                 this.eraseAllObjects();
                 if (this.debugRectangle != null) {
@@ -412,6 +447,7 @@ var BaseRenderer = (function (_super) {
         }
         _super.prototype.destroy.call(this);
     };
+    BaseRenderer.SHOW_DEBUG = true;
     return BaseRenderer;
 }(Phaser.Group));
 var TestRenderer = (function (_super) {
@@ -449,14 +485,25 @@ var StringRenderer = (function (_super) {
                 var fret = strum.getFretPosition(str);
                 if (fret != Strum.NOSTRUM) {
                     this.markerList[midx].x = x + xPos;
-                    this.markerList[midx].y = y + (str + 0.5) * this.rHeight / (this.instrument.getStringCount());
+                    var drawStr = str;
+                    if (this.instrument.isLowestPitchAtBottom()) {
+                        drawStr = (this.instrument.getStringCount() - 1 - drawStr);
+                    }
+                    this.markerList[midx].y = y + (drawStr + 0.5) * this.rHeight / (this.instrument.getStringCount());
                     midx++;
                 }
             }
         }
+        for (var n = 0; n < this.sineList.length; n++) {
+            this.sineList[n].x = x + this.sineStartTime[n] * this.rWidth / (this.bar.getBeats() * 4);
+            this.sineList[n].y = y + this.getSinePositionOffset();
+        }
     };
     StringRenderer.prototype.drawAllObjects = function () {
         this.markerList = [];
+        this.sineList = [];
+        this.sineStartTime = [];
+        this.sineEndTime = [];
         var beats = this.bar.getBeats();
         var objHeight = this.rHeight / (this.instrument.getStringCount()) * 0.9;
         for (var n = 0; n < this.bar.getStrumCount(); n++) {
@@ -472,13 +519,45 @@ var StringRenderer = (function (_super) {
                 }
             }
         }
+        if (this.bar.getStrumCount() == 0) {
+            for (var n = 0; n < beats; n++) {
+                this.addSineGraphic(n * 4, (n + 1) * 4);
+            }
+        }
+        else {
+            this.addSineGraphic(0, this.bar.getStrum(0).getStartTime());
+            for (var n = 0; n < this.bar.getStrumCount(); n++) {
+                this.addSineGraphic(this.bar.getStrum(n).getStartTime(), this.bar.getStrum(n).getEndTime());
+            }
+            this.addSineGraphic(this.bar.getStrum(this.bar.getStrumCount() - 1).getEndTime(), beats * 4);
+        }
     };
     StringRenderer.prototype.eraseAllObjects = function () {
         for (var _i = 0, _a = this.markerList; _i < _a.length; _i++) {
             var img = _a[_i];
             img.destroy();
         }
-        this.markerList = null;
+        for (var _b = 0, _c = this.sineList; _b < _c.length; _b++) {
+            var img2 = _c[_b];
+            img2.destroy();
+        }
+        this.markerList = this.sineList = this.sineStartTime = this.sineEndTime = null;
+    };
+    StringRenderer.prototype.getSinePositionOffset = function () {
+        return -this.rHeight / 2;
+    };
+    StringRenderer.prototype.addSineGraphic = function (start, end) {
+        if (start != end) {
+            var sineHeight = this.rHeight / 2;
+            var sineWidth = (end - start) * this.rWidth / (this.bar.getBeats() * 4);
+            var img = this.game.add.image(0, 0, "sprites", (sineWidth / sineHeight > 1.4) ? "sinecurve_wide" : "sinecurve", this);
+            img.width = sineWidth;
+            img.height = sineHeight;
+            img.anchor.y = 0;
+            this.sineList.push(img);
+            this.sineStartTime.push(start);
+            this.sineEndTime.push(start);
+        }
     };
     StringRenderer._colours = [0xFF0000, 0x00FF00, 0x0040FF, 0xFFFF00, 0x00FFFF, 0xFF00FF, 0xFF8000,
         0x808080, 0xFFFFFF, 0x8B4513];
@@ -487,14 +566,37 @@ var StringRenderer = (function (_super) {
 var StringRendererFactory = (function () {
     function StringRendererFactory() {
     }
-    StringRendererFactory.prototype.getRenderManager = function () {
-        throw new Error("Method not implemented.");
+    StringRendererFactory.prototype.getRenderManager = function (game, instrument, music) {
+        return new StringRenderManager(game, instrument, music);
     };
-    StringRendererFactory.prototype.getRenderer = function (game, instrument, bar) {
-        throw new Error("Method not implemented.");
+    StringRendererFactory.prototype.getRenderer = function (game, instrument, bar, width, height) {
+        return new StringRenderer(game, bar, instrument, width, height);
     };
     return StringRendererFactory;
 }());
+var StringRenderManager = (function (_super) {
+    __extends(StringRenderManager, _super);
+    function StringRenderManager() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    StringRenderManager.prototype.drawBackground = function () {
+    };
+    StringRenderManager.prototype.eraseBackground = function () {
+    };
+    StringRenderManager.prototype.getBoxWidth = function () {
+        return this.game.width / 2.5;
+    };
+    StringRenderManager.prototype.getBoxHeight = function () {
+        return this.game.height / 3;
+    };
+    StringRenderManager.prototype.getXBox = function (fracPos, bar) {
+        return 100 + (-fracPos + bar) * this.getBoxWidth();
+    };
+    StringRenderManager.prototype.getYBox = function (fracPos, bar) {
+        return this.game.height - 100 - this.getBoxHeight();
+    };
+    return StringRenderManager;
+}(BaseRenderManager));
 var StrumMarker = (function (_super) {
     __extends(StrumMarker, _super);
     function StrumMarker(game, sText, width, height, tint) {

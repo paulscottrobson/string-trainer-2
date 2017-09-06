@@ -12,10 +12,9 @@ class MainState extends Phaser.State {
         var json:any = this.game.cache.getJSON("music");
         this.music = new Music(json);
 
-        var rdr:IRenderer = new StringRenderer(this.game,this.music.getBar(0),
-                                               this.music.getInstrument(),600,300);
-        rdr.moveTo(110,110);        
-        //rdr.destroy();                                                
+        var rndm:IRenderManager = new StringRenderManager(this.game,
+                                        this.music.getInstrument(),this.music);
+        //rndm.destroy();
     }
 
     destroy() : void {

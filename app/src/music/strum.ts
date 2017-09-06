@@ -21,11 +21,11 @@ class Strum implements IStrum {
         this.stringCount = instrument.getStringCount();
         this.startTime = startTime;
         this.label = label;
-        this.qbLength = strumDef.charCodeAt(this.stringCount+1)-97;
+        this.qbLength = parseInt(strumDef.substr(-2),10);
         this.fretting = [];
         for (var n = 0;n < this.stringCount;n++) {
-            var c = strumDef.charCodeAt(n);
-            c = (c == 45) ? Strum.NOSTRUM : c - 97;        
+            var c:number = parseInt(strumDef.substr(n*2,2),10);
+            c = (c == 99) ? Strum.NOSTRUM : c;        
             this.fretting.push(c);
         }
         // console.log(strumDef,this.qbLength,this.label,this.fretting);
