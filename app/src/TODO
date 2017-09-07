@@ -1,7 +1,3 @@
-Add bars to string renderer.
-Animate render manager
-Add background to render manager.
-Position ball on Sine Wave 
-Player object
-Button object
-Complete GUI
+Player object (plays music only)
+Matronome object
+Button object / Design and complete GUI

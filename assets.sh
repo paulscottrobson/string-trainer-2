@@ -13,7 +13,8 @@ cp fonts/*.png fonts/*.fnt app/assets/fonts
 
 echo "Updating .ogg files"
 rm app/assets/sounds/*.ogg app/assets/sounds/*.mp3 
-cp sound/[0-9]*.ogg  app/assets/sounds
+cp sound/string/string*.ogg  app/assets/sounds
+cp sound/harmonica/harmonica*.ogg  app/assets/sounds
 cp sound/metronome.ogg app/assets/sounds
 
 echo "Converting OGG to MP3"

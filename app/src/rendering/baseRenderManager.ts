@@ -14,6 +14,7 @@ abstract class BaseRenderManager extends Phaser.Group implements IRenderManager 
     protected renderers:IRenderer[];
     protected instrument:IInstrument;
     protected music:IMusic;
+    private   bouncingBall:Phaser.Image;
 
     constructor(game:Phaser.Game,instrument:IInstrument,music:IMusic) {
         super(game);
@@ -31,6 +32,10 @@ abstract class BaseRenderManager extends Phaser.Group implements IRenderManager 
             this.renderers.push(rnd);
             //rnd.moveTo(50+(bar % 4)*210,Math.floor(bar/4)*110+10);
         }
+        // Create bouncy ball
+        this.bouncingBall = this.game.add.image(100,100,"sprites","sphere_red");
+        this.bouncingBall.anchor.x = 0.5;this.bouncingBall.anchor.y = 1;
+        this.bouncingBall.width = this.bouncingBall.height = this.getBoxHeight()/5;
         // Start position.
         this.updatePosition(0);
     }
@@ -40,6 +45,20 @@ abstract class BaseRenderManager extends Phaser.Group implements IRenderManager 
             this.renderers[bar].moveTo(this.getXBox(fracPos,bar),
                                        this.getYBox(fracPos,bar));
         }
+        var currentBar:number = Math.floor(fracPos);
+        var fracPosPart:number = fracPos - Math.floor(fracPos);
+        if (currentBar < this.music.getBarCount()) {
+            var xBall:number = this.renderers[currentBar].getXBall(fracPosPart);
+            var yBall:number = this.renderers[currentBar].getYBall(fracPosPart);
+            if (xBall != null && yBall != null) {
+                this.bouncingBall.visible = true;
+                this.bouncingBall.bringToTop();
+                this.bouncingBall.x = this.getXBox(fracPos,currentBar) + xBall;
+                this.bouncingBall.y = this.getYBox(fracPos,currentBar) + yBall;
+            } else {
+                this.bouncingBall.visible = false;
+            }
+        }
     }
 
     destroy(): void {
@@ -47,6 +66,7 @@ abstract class BaseRenderManager extends Phaser.Group implements IRenderManager 
             rnd.destroy();
         }
         this.eraseBackground();
+        this.bouncingBall.destroy();this.bouncingBall = null;
         super.destroy();
         this.renderers = this.instrument = this.music = null;
     }

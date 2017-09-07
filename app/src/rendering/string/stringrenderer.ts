@@ -8,12 +8,16 @@
  */
 class StringRenderer extends BaseRenderer {
 
+    private static SINE_HEIGHT_SCALAR:number = 0.5;
+
     private markerList:StrumMarker[];
     private sineList:Phaser.Image[];
     private sineStartTime:number[];
     private sineEndTime:number[];
+    private barMarker:Phaser.Image;
 
     moveAllObjects(x: number, y: number): void {
+
         var beats:number = this.bar.getBeats();
         // we use this to work through the objects in order
         var midx:number = 0;
@@ -43,13 +47,22 @@ class StringRenderer extends BaseRenderer {
             this.sineList[n].x = x + this.sineStartTime[n] * this.rWidth / (this.bar.getBeats()*4);
             this.sineList[n].y = y + this.getSinePositionOffset();
         }
+        // Position barmarker
+        this.barMarker.x = x;this.barMarker.y = y;
     }
 
     drawAllObjects() {
+
         this.markerList = [];
         this.sineList = [];         
         this.sineStartTime = [];
         this.sineEndTime = [];
+
+        // Create the start of bar marker on the bottom.
+        this.barMarker = this.game.add.image(0,0,"sprites","bar",this);
+        this.barMarker.anchor.x = 0.5;this.barMarker.height = this.rHeight;
+        this.barMarker.width = Math.max(1,this.rWidth / 48);
+
         var beats:number = this.bar.getBeats();
         // Height of object, allow spacing
         var objHeight:number = this.rHeight / (this.instrument.getStringCount()) * 0.9;
@@ -78,6 +91,7 @@ class StringRenderer extends BaseRenderer {
             }        
         }
         // Now do the sine curves. If nothing in bar, do it on the beat.
+        
         if (this.bar.getStrumCount() == 0) {
             for (var n = 0;n < beats;n++) {
                 this.addSineGraphic(n*4,(n+1)*4);
@@ -106,6 +120,8 @@ class StringRenderer extends BaseRenderer {
         for (var img2 of this.sineList) {
             img2.destroy();
         }
+        this.barMarker.destroy();
+        this.barMarker = null;
         this.markerList = this.sineList = this.sineStartTime = this.sineEndTime = null;
     }
 
@@ -130,7 +146,7 @@ class StringRenderer extends BaseRenderer {
      */
     private addSineGraphic(start:number,end:number) {
         if (start != end) {
-            var sineHeight:number = this.rHeight/2;
+            var sineHeight:number = this.rHeight * StringRenderer.SINE_HEIGHT_SCALAR;
             var sineWidth:number = (end-start)*this.rWidth / (this.bar.getBeats()*4);
             var img:Phaser.Image = this.game.add.image(0,0,"sprites",
                                             (sineWidth/sineHeight > 1.4) ? "sinecurve_wide":"sinecurve",
@@ -139,9 +155,25 @@ class StringRenderer extends BaseRenderer {
             // img.tint = 0;
             this.sineList.push(img);
             this.sineStartTime.push(start);
-            this.sineEndTime.push(start);
+            this.sineEndTime.push(end);
             // console.log(start,end,sineHeight,sineWidth);
         }
     }
 
+    getXBall(fractionalBar:number):number {
+        return fractionalBar * this.rWidth;
+    }
+    
+    getYBall(fractionalBar:number):number {
+        var qbPos:number = fractionalBar * this.bar.getBeats() * 4;
+        for (var n:number = 0;n < this.sineList.length;n++) {
+            if (qbPos >= this.sineStartTime[n] && qbPos < this.sineEndTime[n]) {
+                var prop:number = (qbPos - this.sineStartTime[n]) / (this.sineEndTime[n] - this.sineStartTime[n]);
+                var offset:number = Math.sin(prop * Math.PI);
+                offset = offset * this.rHeight * StringRenderer.SINE_HEIGHT_SCALAR;
+                return -offset;
+            }
+        }
+        return 0;
+    }
 }

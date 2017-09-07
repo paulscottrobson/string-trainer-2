@@ -26,6 +26,9 @@ class Music implements IMusic {
         this.capo = parseInt(this.json["capo"],10);
         // Get the instrument's information object
         this.instrument = this.getInstrumentObject(this.json["instrument"]);
+        // Initial count in
+        this.bars.push(new Bar("",this.beats,this.instrument,this.barCount));
+        this.barCount++;
         // Parse bars.
         for (var barDef of this.json["bars"]) {
             this.bars.push(new Bar(barDef,this.beats,this.instrument,this.barCount));

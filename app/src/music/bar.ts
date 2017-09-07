@@ -28,14 +28,16 @@ class Bar implements IBar {
         this.strumCount = 0;
         var qbTime:number = 0;
         var currentLabel:string = "";
-        for (var strumDef of def.split(";")) {
-            if (strumDef[0] == '[') {
-                currentLabel = strumDef.substr(1,strumDef.length-2);
-            } else {
-                var strum:IStrum = new Strum(strumDef,instrument,qbTime,currentLabel);
-                this.strums.push(strum);
-                this.strumCount++;
-                qbTime = qbTime + strum.getLength();
+        if (def != "") {
+            for (var strumDef of def.split(";")) {
+                if (strumDef[0] == '[') {
+                    currentLabel = strumDef.substr(1,strumDef.length-2);
+                } else {
+                    var strum:IStrum = new Strum(strumDef,instrument,qbTime,currentLabel);
+                    this.strums.push(strum);
+                    this.strumCount++;
+                    qbTime = qbTime + strum.getLength();
+                }
             }
         }
     }

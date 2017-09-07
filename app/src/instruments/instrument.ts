@@ -11,6 +11,7 @@ abstract class Instrument implements IInstrument {
     abstract getDefaultTuning(): string;
     abstract getStringCount(): number;
     abstract getRendererFactory():IRendererFactory;
+    abstract getSoundSetDescriptor():ISoundSet;
 
     isContinuous():boolean {
         return false;
@@ -38,6 +39,10 @@ abstract class StringInstrument extends Instrument {
     getRendererFactory(): IRendererFactory {
         return new StringRendererFactory();
     }
+    getSoundSetDescriptor():ISoundSet {
+        return new SoundSet_String();
+    }
+
 }
 
 /**
@@ -59,7 +64,7 @@ abstract class DiatonicStringInstrument extends StringInstrument {
         // Get the offset for the bottom 7
         var n:number = DiatonicStringInstrument.TODIATONIC[fret % 12];
         // Adjust for octave
-        n = n + Math.floor(fret/12);
+        n = n + Math.floor(fret/12) * 7;
         // Convert to string
         var display:string = Math.floor(n).toString();
         // If .5 add a '+'

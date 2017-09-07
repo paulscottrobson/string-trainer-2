@@ -11,7 +11,11 @@ var __extends = (this && this.__extends) || (function () {
 var MainState = (function (_super) {
     __extends(MainState, _super);
     function MainState() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.barFractionalPosition = 0;
+        _this.isPaused = false;
+        _this.tempo = 120;
+        return _this;
     }
     MainState.prototype.create = function () {
         var bgr = this.game.add.image(0, 0, "sprites", "background");
@@ -19,12 +23,28 @@ var MainState = (function (_super) {
         bgr.height = this.game.height;
         var json = this.game.cache.getJSON("music");
         this.music = new Music(json);
-        var rndm = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
+        this.renderManager = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
+        this.barFractionalPosition = 0;
+        this.tempo = this.music.getTempo();
+        var a = this.game.add.audio("harmonica-01");
+        a.play();
     };
     MainState.prototype.destroy = function () {
-        this.music = null;
+        this.renderManager.destroy();
+        this.music = this.renderManager = null;
     };
     MainState.prototype.update = function () {
+        if (this.renderManager != null) {
+            if (!this.isPaused) {
+                var time = this.game.time.elapsedMS;
+                time = time / 1000 / 60;
+                var beatsElapsed = this.tempo * time;
+                var barsElapsed = beatsElapsed / this.music.getBeats();
+                this.barFractionalPosition += barsElapsed;
+                this.barFractionalPosition = Math.min(this.barFractionalPosition, this.music.getBarCount());
+                this.renderManager.updatePosition(this.barFractionalPosition);
+            }
+        }
     };
     return MainState;
 }(Phaser.State));
@@ -53,6 +73,9 @@ var StringInstrument = (function (_super) {
     StringInstrument.prototype.getRendererFactory = function () {
         return new StringRendererFactory();
     };
+    StringInstrument.prototype.getSoundSetDescriptor = function () {
+        return new SoundSet_String();
+    };
     return StringInstrument;
 }(Instrument));
 var DiatonicStringInstrument = (function (_super) {
@@ -62,7 +85,7 @@ var DiatonicStringInstrument = (function (_super) {
     }
     DiatonicStringInstrument.prototype.toDisplayFret = function (fret) {
         var n = DiatonicStringInstrument.TODIATONIC[fret % 12];
-        n = n + Math.floor(fret / 12);
+        n = n + Math.floor(fret / 12) * 7;
         var display = Math.floor(n).toString();
         if (n != Math.floor(n)) {
             display = display + "+";
@@ -138,16 +161,18 @@ var Bar = (function () {
         this.strumCount = 0;
         var qbTime = 0;
         var currentLabel = "";
-        for (var _i = 0, _a = def.split(";"); _i < _a.length; _i++) {
-            var strumDef = _a[_i];
-            if (strumDef[0] == '[') {
-                currentLabel = strumDef.substr(1, strumDef.length - 2);
-            }
-            else {
-                var strum = new Strum(strumDef, instrument, qbTime, currentLabel);
-                this.strums.push(strum);
-                this.strumCount++;
-                qbTime = qbTime + strum.getLength();
+        if (def != "") {
+            for (var _i = 0, _a = def.split(";"); _i < _a.length; _i++) {
+                var strumDef = _a[_i];
+                if (strumDef[0] == '[') {
+                    currentLabel = strumDef.substr(1, strumDef.length - 2);
+                }
+                else {
+                    var strum = new Strum(strumDef, instrument, qbTime, currentLabel);
+                    this.strums.push(strum);
+                    this.strumCount++;
+                    qbTime = qbTime + strum.getLength();
+                }
             }
         }
     }
@@ -174,6 +199,8 @@ var Music = (function () {
         this.tempo = parseInt(this.json["speed"], 10);
         this.capo = parseInt(this.json["capo"], 10);
         this.instrument = this.getInstrumentObject(this.json["instrument"]);
+        this.bars.push(new Bar("", this.beats, this.instrument, this.barCount));
+        this.barCount++;
         for (var _i = 0, _a = this.json["bars"]; _i < _a.length; _i++) {
             var barDef = _a[_i];
             this.bars.push(new Bar(barDef, this.beats, this.instrument, this.barCount));
@@ -339,18 +366,21 @@ var PreloadState = (function (_super) {
             var fontName = _a[_i];
             this.game.load.bitmapFont(fontName, "assets/fonts/" + fontName + ".png", "assets/fonts/" + fontName + ".fnt");
         }
-        for (var i = 1; i <= PreloadState.NOTE_COUNT; i++) {
-            var sound = i.toString();
-            this.game.load.audio(sound, ["assets/sounds/" + sound + ".mp3",
-                "assets/sounds/" + sound + ".ogg"]);
-        }
+        this.preloadSounds(new SoundSet_String());
+        this.preloadSounds(new SoundSet_Harmonica());
         this.game.load.audio("metronome", ["assets/sounds/metronome.mp3",
             "assets/sounds/metronome.ogg"]);
         var src = StringTrainerApplication.getURLName("music", "music.json");
         this.game.load.json("music", StringTrainerApplication.getURLName("music", src));
         this.game.load.onLoadComplete.add(function () { _this.game.state.start("Main", true, false, 1); }, this);
     };
-    PreloadState.NOTE_COUNT = 48;
+    PreloadState.prototype.preloadSounds = function (desc) {
+        for (var i = 1; i <= desc.getNoteCount(); i++) {
+            var sound = desc.getStem() + "-" + (i < 10 ? "0" : "") + i.toString();
+            this.game.load.audio(sound, ["assets/sounds/" + sound + ".mp3",
+                "assets/sounds/" + sound + ".ogg"]);
+        }
+    };
     return PreloadState;
 }(Phaser.State));
 var BaseRenderManager = (function (_super) {
@@ -366,12 +396,31 @@ var BaseRenderManager = (function (_super) {
             var rnd = factory.getRenderer(game, instrument, music.getBar(bar), _this.getBoxWidth(), _this.getBoxHeight());
             _this.renderers.push(rnd);
         }
+        _this.bouncingBall = _this.game.add.image(100, 100, "sprites", "sphere_red");
+        _this.bouncingBall.anchor.x = 0.5;
+        _this.bouncingBall.anchor.y = 1;
+        _this.bouncingBall.width = _this.bouncingBall.height = _this.getBoxHeight() / 5;
         _this.updatePosition(0);
         return _this;
     }
     BaseRenderManager.prototype.updatePosition = function (fracPos) {
         for (var bar = 0; bar < this.music.getBarCount(); bar++) {
             this.renderers[bar].moveTo(this.getXBox(fracPos, bar), this.getYBox(fracPos, bar));
+        }
+        var currentBar = Math.floor(fracPos);
+        var fracPosPart = fracPos - Math.floor(fracPos);
+        if (currentBar < this.music.getBarCount()) {
+            var xBall = this.renderers[currentBar].getXBall(fracPosPart);
+            var yBall = this.renderers[currentBar].getYBall(fracPosPart);
+            if (xBall != null && yBall != null) {
+                this.bouncingBall.visible = true;
+                this.bouncingBall.bringToTop();
+                this.bouncingBall.x = this.getXBox(fracPos, currentBar) + xBall;
+                this.bouncingBall.y = this.getYBox(fracPos, currentBar) + yBall;
+            }
+            else {
+                this.bouncingBall.visible = false;
+            }
         }
     };
     BaseRenderManager.prototype.destroy = function () {
@@ -380,6 +429,8 @@ var BaseRenderManager = (function (_super) {
             rnd.destroy();
         }
         this.eraseBackground();
+        this.bouncingBall.destroy();
+        this.bouncingBall = null;
         _super.prototype.destroy.call(this);
         this.renderers = this.instrument = this.music = null;
     };
@@ -447,7 +498,13 @@ var BaseRenderer = (function (_super) {
         }
         _super.prototype.destroy.call(this);
     };
-    BaseRenderer.SHOW_DEBUG = true;
+    BaseRenderer.prototype.getXBall = function (fractionalBar) {
+        return null;
+    };
+    BaseRenderer.prototype.getYBall = function (fractionalBar) {
+        return null;
+    };
+    BaseRenderer.SHOW_DEBUG = false;
     return BaseRenderer;
 }(Phaser.Group));
 var TestRenderer = (function (_super) {
@@ -498,12 +555,18 @@ var StringRenderer = (function (_super) {
             this.sineList[n].x = x + this.sineStartTime[n] * this.rWidth / (this.bar.getBeats() * 4);
             this.sineList[n].y = y + this.getSinePositionOffset();
         }
+        this.barMarker.x = x;
+        this.barMarker.y = y;
     };
     StringRenderer.prototype.drawAllObjects = function () {
         this.markerList = [];
         this.sineList = [];
         this.sineStartTime = [];
         this.sineEndTime = [];
+        this.barMarker = this.game.add.image(0, 0, "sprites", "bar", this);
+        this.barMarker.anchor.x = 0.5;
+        this.barMarker.height = this.rHeight;
+        this.barMarker.width = Math.max(1, this.rWidth / 48);
         var beats = this.bar.getBeats();
         var objHeight = this.rHeight / (this.instrument.getStringCount()) * 0.9;
         for (var n = 0; n < this.bar.getStrumCount(); n++) {
@@ -541,6 +604,8 @@ var StringRenderer = (function (_super) {
             var img2 = _c[_b];
             img2.destroy();
         }
+        this.barMarker.destroy();
+        this.barMarker = null;
         this.markerList = this.sineList = this.sineStartTime = this.sineEndTime = null;
     };
     StringRenderer.prototype.getSinePositionOffset = function () {
@@ -548,7 +613,7 @@ var StringRenderer = (function (_super) {
     };
     StringRenderer.prototype.addSineGraphic = function (start, end) {
         if (start != end) {
-            var sineHeight = this.rHeight / 2;
+            var sineHeight = this.rHeight * StringRenderer.SINE_HEIGHT_SCALAR;
             var sineWidth = (end - start) * this.rWidth / (this.bar.getBeats() * 4);
             var img = this.game.add.image(0, 0, "sprites", (sineWidth / sineHeight > 1.4) ? "sinecurve_wide" : "sinecurve", this);
             img.width = sineWidth;
@@ -556,9 +621,25 @@ var StringRenderer = (function (_super) {
             img.anchor.y = 0;
             this.sineList.push(img);
             this.sineStartTime.push(start);
-            this.sineEndTime.push(start);
+            this.sineEndTime.push(end);
         }
     };
+    StringRenderer.prototype.getXBall = function (fractionalBar) {
+        return fractionalBar * this.rWidth;
+    };
+    StringRenderer.prototype.getYBall = function (fractionalBar) {
+        var qbPos = fractionalBar * this.bar.getBeats() * 4;
+        for (var n = 0; n < this.sineList.length; n++) {
+            if (qbPos >= this.sineStartTime[n] && qbPos < this.sineEndTime[n]) {
+                var prop = (qbPos - this.sineStartTime[n]) / (this.sineEndTime[n] - this.sineStartTime[n]);
+                var offset = Math.sin(prop * Math.PI);
+                offset = offset * this.rHeight * StringRenderer.SINE_HEIGHT_SCALAR;
+                return -offset;
+            }
+        }
+        return 0;
+    };
+    StringRenderer.SINE_HEIGHT_SCALAR = 0.5;
     StringRenderer._colours = [0xFF0000, 0x00FF00, 0x0040FF, 0xFFFF00, 0x00FFFF, 0xFF00FF, 0xFF8000,
         0x808080, 0xFFFFFF, 0x8B4513];
     return StringRenderer;
@@ -580,6 +661,24 @@ var StringRenderManager = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     StringRenderManager.prototype.drawBackground = function () {
+        var bgr = this.game.add.image(0, this.getYBox(0, 0) + this.getBoxHeight() / 2, "sprites", "fretboard", this);
+        bgr.width = this.game.width;
+        bgr.height = this.getBoxHeight() * 130 / 100;
+        bgr.anchor.y = 0.5;
+        for (var s = 0; s < this.instrument.getStringCount(); s++) {
+            var sn = s;
+            if (this.instrument.isLowestPitchAtBottom()) {
+                sn = this.instrument.getStringCount() - 1 - sn;
+            }
+            var y = this.getYBox(0, 0) + (sn + 0.5) * this.getBoxHeight() / this.instrument.getStringCount();
+            var str = this.game.add.image(0, y, "sprites", this.instrument.isDoubleString(s) ? "mstring" : "string", this);
+            str.width = this.game.width;
+            str.height = Math.max(1, this.getBoxHeight() / 24);
+            str.anchor.y = 0.5;
+            if (this.instrument.isDoubleString(s)) {
+                str.height = str.height * 2;
+            }
+        }
     };
     StringRenderManager.prototype.eraseBackground = function () {
     };
@@ -587,10 +686,10 @@ var StringRenderManager = (function (_super) {
         return this.game.width / 2.5;
     };
     StringRenderManager.prototype.getBoxHeight = function () {
-        return this.game.height / 3;
+        return this.game.height / 2.5;
     };
     StringRenderManager.prototype.getXBox = function (fracPos, bar) {
-        return 100 + (-fracPos + bar) * this.getBoxWidth();
+        return this.game.width / 4 + (-fracPos + bar) * this.getBoxWidth();
     };
     StringRenderManager.prototype.getYBox = function (fracPos, bar) {
         return this.game.height - 100 - this.getBoxHeight();
@@ -629,3 +728,31 @@ var StrumMarker = (function (_super) {
     StrumMarker.BOXRATIO = [0, 102 / 50, 124 / 50, 152 / 50, 183 / 50, 199 / 50, 75 / 50, 50 / 50, 250 / 50];
     return StrumMarker;
 }(Phaser.Group));
+var SoundSet_Harmonica = (function () {
+    function SoundSet_Harmonica() {
+    }
+    SoundSet_Harmonica.prototype.getBassNote = function () {
+        return "C4";
+    };
+    SoundSet_Harmonica.prototype.getNoteCount = function () {
+        return 37;
+    };
+    SoundSet_Harmonica.prototype.getStem = function () {
+        return "harmonica";
+    };
+    return SoundSet_Harmonica;
+}());
+var SoundSet_String = (function () {
+    function SoundSet_String() {
+    }
+    SoundSet_String.prototype.getBassNote = function () {
+        return "C3";
+    };
+    SoundSet_String.prototype.getNoteCount = function () {
+        return 48;
+    };
+    SoundSet_String.prototype.getStem = function () {
+        return "string";
+    };
+    return SoundSet_String;
+}());

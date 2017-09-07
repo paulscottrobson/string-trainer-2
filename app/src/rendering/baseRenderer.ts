@@ -23,7 +23,7 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
     private xiLast:number;
     private yiLast:number;
 
-    private static SHOW_DEBUG:boolean = true;
+    private static SHOW_DEBUG:boolean = false;
 
     abstract moveAllObjects(x:number,y:number): void;
     abstract drawAllObjects(); void;
@@ -39,6 +39,7 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
      * @param {number} height size
      * @memberof BaseRenderer
      */
+
     constructor(game:Phaser.Game,bar:IBar,instrument:IInstrument,width:number,height:number) {
         super(game);
         // Mark as not drawn and save information
@@ -103,6 +104,14 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
         // Finish off.
         super.destroy();
     }
+
+    getXBall(fractionalBar:number):number {
+        return null;
+    }
+    getYBall(fractionalBar:number):number {
+        return null;
+    }
+    
 }
 
 /**

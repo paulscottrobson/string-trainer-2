@@ -66,4 +66,12 @@ interface IInstrument {
      * @memberof IInstrument
      */
     getRendererFactory(): IRendererFactory;
+
+    /**
+     * Get the descriptor for the sound set to be used for this instrument.
+     * 
+     * @returns {ISoundSet} 
+     * @memberof IInstrument
+     */
+    getSoundSetDescriptor(): ISoundSet;
 }
