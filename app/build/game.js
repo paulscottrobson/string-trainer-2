@@ -26,28 +26,103 @@ var MainState = (function (_super) {
         this.renderManager = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
         this.barFractionalPosition = 0;
         this.tempo = this.music.getTempo();
-        var a = this.game.add.audio("harmonica-01");
-        a.play();
+        this.audioMetronome = new AudioMetronome(this.game, this.music);
+        this.guiMetronome = new VisualMetronome(this.game, this.music);
     };
     MainState.prototype.destroy = function () {
         this.renderManager.destroy();
-        this.music = this.renderManager = null;
+        this.audioMetronome.destroy();
+        this.guiMetronome.destroy();
+        this.music = this.renderManager = this.audioMetronome = null;
+        this.guiMetronome = null;
     };
     MainState.prototype.update = function () {
         if (this.renderManager != null) {
             if (!this.isPaused) {
                 var time = this.game.time.elapsedMS;
                 time = time / 1000 / 60;
+                time = time / 2;
                 var beatsElapsed = this.tempo * time;
                 var barsElapsed = beatsElapsed / this.music.getBeats();
                 this.barFractionalPosition += barsElapsed;
                 this.barFractionalPosition = Math.min(this.barFractionalPosition, this.music.getBarCount());
                 this.renderManager.updatePosition(this.barFractionalPosition);
+                this.audioMetronome.updateTime(this.barFractionalPosition);
+                this.guiMetronome.updateTime(this.barFractionalPosition);
             }
         }
     };
     return MainState;
 }(Phaser.State));
+var BaseClockEntity = (function () {
+    function BaseClockEntity(beats) {
+        this.beats = beats;
+        this.lastBar = this.lastQBeat = -1;
+    }
+    BaseClockEntity.prototype.updateTime = function (fracPos) {
+        var bar = Math.floor(fracPos);
+        var qBeat = Math.floor((fracPos - bar) * this.beats * 4);
+        if (bar != this.lastBar || qBeat != this.lastQBeat) {
+            this.updateOnQuarterBeatChange(bar, qBeat);
+            this.lastBar = bar;
+            this.lastQBeat = qBeat;
+        }
+        this.updateOnFractionalChange(bar, fracPos - bar);
+    };
+    BaseClockEntity.prototype.updateOnQuarterBeatChange = function (bar, quarterBeat) {
+    };
+    BaseClockEntity.prototype.updateOnFractionalChange = function (bar, fracPosInBar) {
+    };
+    return BaseClockEntity;
+}());
+var AudioMetronome = (function (_super) {
+    __extends(AudioMetronome, _super);
+    function AudioMetronome(game, music) {
+        var _this = _super.call(this, music.getBeats()) || this;
+        _this.tick = game.add.audio("metronome");
+        _this.metronomeOn = true;
+        return _this;
+    }
+    AudioMetronome.prototype.destroy = function () {
+        this.tick = null;
+    };
+    AudioMetronome.prototype.setMetronome = function (isOn) {
+        this.metronomeOn = isOn;
+    };
+    AudioMetronome.prototype.updateOnQuarterBeatChange = function (bar, quarterBeat) {
+        if (quarterBeat % 4 == 0 && this.metronomeOn) {
+            this.tick.play("", 0, (quarterBeat == 0) ? 1.0 : 0.5, false, true);
+        }
+    };
+    return AudioMetronome;
+}(BaseClockEntity));
+var VisualMetronome = (function (_super) {
+    __extends(VisualMetronome, _super);
+    function VisualMetronome(game, music) {
+        var _this = _super.call(this, music.getBeats()) || this;
+        _this.metronome = game.add.image(100, game.height, "sprites", "metronome");
+        _this.metronome.anchor.x = 0.5;
+        _this.metronome.anchor.y = 0.9;
+        var scale = game.height / 4 / _this.metronome.height;
+        _this.metronome.scale.x = _this.metronome.scale.y = scale;
+        _this.metronome.x = game.width - 100;
+        _this.metronome.y = _this.metronome.height;
+        return _this;
+    }
+    VisualMetronome.prototype.updateOnFractionalChange = function (bar, fracPosInBar) {
+        var overallBeat = bar * this.beats + Math.floor(fracPosInBar * this.beats);
+        var fracOffset = fracPosInBar * this.beats;
+        fracOffset = fracOffset - Math.floor(fracOffset) - 0.5;
+        if (overallBeat % 2 == 0)
+            fracOffset = -fracOffset;
+        this.metronome.rotation = Math.sin(fracOffset);
+    };
+    VisualMetronome.prototype.destroy = function () {
+        this.metronome.destroy();
+        this.metronome = null;
+    };
+    return VisualMetronome;
+}(BaseClockEntity));
 var Instrument = (function () {
     function Instrument() {
     }

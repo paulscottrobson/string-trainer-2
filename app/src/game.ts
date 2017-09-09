@@ -7,6 +7,8 @@ class MainState extends Phaser.State {
     private barFractionalPosition:number = 0;
     private isPaused:boolean = false;
     private tempo:number = 120;
+    private audioMetronome:AudioMetronome;
+    private guiMetronome:VisualMetronome;
 
     create() : void {
         // Stretched background
@@ -24,14 +26,16 @@ class MainState extends Phaser.State {
 
         this.barFractionalPosition = 0;
         this.tempo = this.music.getTempo();
-
-        var a:Phaser.Sound = this.game.add.audio("harmonica-01");
-        a.play();
+        this.audioMetronome = new AudioMetronome(this.game,this.music);
+        this.guiMetronome = new VisualMetronome(this.game,this.music);
     }
 
     destroy() : void {
         this.renderManager.destroy();
-        this.music = this.renderManager = null;
+        this.audioMetronome.destroy();
+        this.guiMetronome.destroy();
+        this.music = this.renderManager = this.audioMetronome = null;
+        this.guiMetronome = null;
     }
 
     update() : void {
@@ -41,6 +45,7 @@ class MainState extends Phaser.State {
                 var time:number = this.game.time.elapsedMS;
                 // Convert to elapsed minutes.
                 time = time / 1000 / 60;
+                time = time / 2;
                 // Convert to beats elapsed 
                 var beatsElapsed:number = this.tempo * time;
                 // Convert to bars elapsed 
@@ -51,6 +56,8 @@ class MainState extends Phaser.State {
                                                       this.music.getBarCount());
                 // Update the music position.                                                      
                 this.renderManager.updatePosition(this.barFractionalPosition);
+                this.audioMetronome.updateTime(this.barFractionalPosition);
+                this.guiMetronome.updateTime(this.barFractionalPosition);
             }
         }
     }
