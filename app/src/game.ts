@@ -9,6 +9,7 @@ class MainState extends Phaser.State {
     private tempo:number = 120;
     private audioMetronome:AudioMetronome;
     private guiMetronome:VisualMetronome;
+    private musicPlayer:MusicPlayer;
 
     create() : void {
         // Stretched background
@@ -28,14 +29,16 @@ class MainState extends Phaser.State {
         this.tempo = this.music.getTempo();
         this.audioMetronome = new AudioMetronome(this.game,this.music);
         this.guiMetronome = new VisualMetronome(this.game,this.music);
+        this.musicPlayer = new MusicPlayer(this.game,this.music);
     }
 
     destroy() : void {
         this.renderManager.destroy();
         this.audioMetronome.destroy();
         this.guiMetronome.destroy();
+        this.musicPlayer.destroy();
         this.music = this.renderManager = this.audioMetronome = null;
-        this.guiMetronome = null;
+        this.guiMetronome = this.musicPlayer = null;
     }
 
     update() : void {
@@ -45,7 +48,6 @@ class MainState extends Phaser.State {
                 var time:number = this.game.time.elapsedMS;
                 // Convert to elapsed minutes.
                 time = time / 1000 / 60;
-                time = time / 2;
                 // Convert to beats elapsed 
                 var beatsElapsed:number = this.tempo * time;
                 // Convert to bars elapsed 
@@ -54,10 +56,11 @@ class MainState extends Phaser.State {
                 this.barFractionalPosition += barsElapsed
                 this.barFractionalPosition = Math.min(this.barFractionalPosition,
                                                       this.music.getBarCount());
-                // Update the music position.                                                      
+                // Update the music position, metronomes and player
                 this.renderManager.updatePosition(this.barFractionalPosition);
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
+                this.musicPlayer.updateTime(this.barFractionalPosition);
             }
         }
     }

@@ -81,7 +81,7 @@ class Music implements IMusic {
     }
     getTuning(): string[] {
         var tuning:string = this.json["tuning"];
-        if (tuning != "") {
+        if (tuning == "") {
             tuning = this.instrument.getDefaultTuning();
         }
         return tuning.toLowerCase().split(",");

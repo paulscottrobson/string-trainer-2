@@ -8,7 +8,7 @@
  */
 class SoundSet_String implements ISoundSet {
     
-    getBassNote(): string {
+    getBaseNote(): string {
         return "C3";
     }
     getNoteCount(): number {

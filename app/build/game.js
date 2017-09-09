@@ -28,20 +28,21 @@ var MainState = (function (_super) {
         this.tempo = this.music.getTempo();
         this.audioMetronome = new AudioMetronome(this.game, this.music);
         this.guiMetronome = new VisualMetronome(this.game, this.music);
+        this.musicPlayer = new MusicPlayer(this.game, this.music);
     };
     MainState.prototype.destroy = function () {
         this.renderManager.destroy();
         this.audioMetronome.destroy();
         this.guiMetronome.destroy();
+        this.musicPlayer.destroy();
         this.music = this.renderManager = this.audioMetronome = null;
-        this.guiMetronome = null;
+        this.guiMetronome = this.musicPlayer = null;
     };
     MainState.prototype.update = function () {
         if (this.renderManager != null) {
             if (!this.isPaused) {
                 var time = this.game.time.elapsedMS;
                 time = time / 1000 / 60;
-                time = time / 2;
                 var beatsElapsed = this.tempo * time;
                 var barsElapsed = beatsElapsed / this.music.getBeats();
                 this.barFractionalPosition += barsElapsed;
@@ -49,6 +50,7 @@ var MainState = (function (_super) {
                 this.renderManager.updatePosition(this.barFractionalPosition);
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
+                this.musicPlayer.updateTime(this.barFractionalPosition);
             }
         }
     };
@@ -122,6 +124,94 @@ var VisualMetronome = (function (_super) {
         this.metronome = null;
     };
     return VisualMetronome;
+}(BaseClockEntity));
+var MusicPlayer = (function (_super) {
+    __extends(MusicPlayer, _super);
+    function MusicPlayer(game, music) {
+        var _this = _super.call(this, music.getBeats()) || this;
+        _this.music = music;
+        _this.loadNoteSet(game);
+        var tuning = _this.music.getTuning();
+        _this.tuning = [];
+        _this.stringSoundIndex = [];
+        _this.musicOn = true;
+        for (var n = 0; n < tuning.length; n++) {
+            _this.tuning[n] = _this.convertToID(tuning[n]);
+            _this.stringSoundIndex[n] = Strum.NOSTRUM;
+        }
+        return _this;
+    }
+    MusicPlayer.prototype.destroy = function () {
+        for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
+            var note = _a[_i];
+            note.destroy();
+        }
+        this.notes = null;
+        this.music = null;
+        this.tuning = null;
+    };
+    MusicPlayer.prototype.setMusic = function (isOn) {
+        this.musicOn = isOn;
+    };
+    MusicPlayer.prototype.updateOnQuarterBeatChange = function (bar, quarterBeat) {
+        if (bar < 0 || bar >= this.music.getBarCount() || !this.musicOn) {
+            this.stopAllNotes();
+            return;
+        }
+        var barInfo = this.music.getBar(bar);
+        for (var n = 0; n < barInfo.getStrumCount(); n++) {
+            var strum = barInfo.getStrum(n);
+            if (strum.getEndTime() == quarterBeat) {
+                if (this.music.getInstrument().isContinuous()) {
+                    this.stopAllNotes();
+                }
+            }
+            if (strum.getStartTime() == quarterBeat) {
+                for (var ns = 0; ns < strum.getStringCount(); ns++) {
+                    var offset = strum.getFretPosition(ns);
+                    if (offset != Strum.NOSTRUM) {
+                        this.startNote(offset, ns);
+                    }
+                }
+            }
+        }
+    };
+    MusicPlayer.prototype.startNote = function (noteOffset, stringID) {
+        if (this.stringSoundIndex[stringID] != Strum.NOSTRUM) {
+            this.notes[this.stringSoundIndex[stringID]].stop();
+            this.stringSoundIndex[stringID] = Strum.NOSTRUM;
+        }
+        this.stringSoundIndex[stringID] = noteOffset +
+            this.tuning[stringID] - this.baseNoteID + 1;
+        this.notes[this.stringSoundIndex[stringID]].play();
+    };
+    MusicPlayer.prototype.stopAllNotes = function () {
+        for (var n = 0; n < this.stringSoundIndex.length; n++) {
+            if (this.stringSoundIndex[n] != Strum.NOSTRUM) {
+                this.notes[this.stringSoundIndex[n]].stop();
+                this.stringSoundIndex[n] = Strum.NOSTRUM;
+            }
+        }
+    };
+    MusicPlayer.prototype.loadNoteSet = function (game) {
+        var soundSet = this.music.getInstrument().getSoundSetDescriptor();
+        this.notes = [];
+        for (var n = 1; n <= soundSet.getNoteCount(); n++) {
+            var name = soundSet.getStem() + "-" + (n < 10 ? "0" : "") + n.toString();
+            this.notes[n] = game.add.audio(name);
+        }
+        this.baseNoteID = this.convertToID(soundSet.getBaseNote());
+    };
+    MusicPlayer.prototype.convertToID = function (name) {
+        name = name.toUpperCase();
+        var base = MusicPlayer.NOTETOOFFSET[name.substr(0, name.length - 1)];
+        base = base + (name.charCodeAt(name.length - 1) - 49) * 12;
+        return base;
+    };
+    MusicPlayer.NOTETOOFFSET = {
+        "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11
+    };
+    return MusicPlayer;
 }(BaseClockEntity));
 var Instrument = (function () {
     function Instrument() {
@@ -328,7 +418,7 @@ var Music = (function () {
     };
     Music.prototype.getTuning = function () {
         var tuning = this.json["tuning"];
-        if (tuning != "") {
+        if (tuning == "") {
             tuning = this.instrument.getDefaultTuning();
         }
         return tuning.toLowerCase().split(",");
@@ -806,7 +896,7 @@ var StrumMarker = (function (_super) {
 var SoundSet_Harmonica = (function () {
     function SoundSet_Harmonica() {
     }
-    SoundSet_Harmonica.prototype.getBassNote = function () {
+    SoundSet_Harmonica.prototype.getBaseNote = function () {
         return "C4";
     };
     SoundSet_Harmonica.prototype.getNoteCount = function () {
@@ -820,7 +910,7 @@ var SoundSet_Harmonica = (function () {
 var SoundSet_String = (function () {
     function SoundSet_String() {
     }
-    SoundSet_String.prototype.getBassNote = function () {
+    SoundSet_String.prototype.getBaseNote = function () {
         return "C3";
     };
     SoundSet_String.prototype.getNoteCount = function () {

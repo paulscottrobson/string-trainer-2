@@ -12,7 +12,7 @@ interface ISoundSet {
      * @returns {string} string descriptor using D#3 format. (no flats)
      * @memberof ISoundSet
      */
-    getBassNote():string;
+    getBaseNote():string;
     /**
      * Get Number of notes in set
      * 

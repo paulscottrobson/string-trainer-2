@@ -8,7 +8,7 @@
  */
 class SoundSet_Harmonica implements ISoundSet {
     
-    getBassNote(): string {
+    getBaseNote(): string {
         return "C4";
     }
     getNoteCount(): number {
