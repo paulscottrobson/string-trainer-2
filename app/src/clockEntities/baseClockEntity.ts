@@ -7,7 +7,7 @@
  * 
  * @class BaseClockEntity
  */
-class BaseClockEntity {
+abstract class BaseClockEntity implements IClockEntity {
 
     protected beats:number;
     private lastBar:number;
@@ -24,13 +24,9 @@ class BaseClockEntity {
         this.lastBar = this.lastQBeat = -1;    
     }
 
-    /**
-     * Update the time in the entity
-     * 
-     * @param {number} fracPos fractional bar position
-     * @memberof BaseClockEntity
-     */
-    updateTime(fracPos:number) {
+    abstract destroy(): void;
+
+    updateTime(fracPos:number) : void {
         var bar:number = Math.floor(fracPos);
         var qBeat:number = Math.floor((fracPos-bar) * this.beats * 4);
         if (bar != this.lastBar || qBeat != this.lastQBeat) {

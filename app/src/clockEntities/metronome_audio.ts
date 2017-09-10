@@ -28,13 +28,7 @@ class AudioMetronome extends BaseClockEntity {
         this.tick = null;
     }
 
-    /**
-     * Set metronome on/off state
-     * 
-     * @param {boolean} isOn true if on.
-     * @memberof AudioMetronome
-     */
-    setMetronome(isOn:boolean) {
+    setVolume(isOn:boolean) : void {
         this.metronomeOn = isOn;
     }
 

@@ -25,10 +25,16 @@ var MainState = (function (_super) {
         this.music = new Music(json);
         this.renderManager = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
         this.barFractionalPosition = 0;
-        this.tempo = this.music.getTempo();
+        this.lastFractionalPosition = -1;
+        this.tempo = this.getDefaultTempo();
         this.audioMetronome = new AudioMetronome(this.game, this.music);
         this.guiMetronome = new VisualMetronome(this.game, this.music);
         this.musicPlayer = new MusicPlayer(this.game, this.music);
+        var btn = new PushButton(this.game, "i_faster", this, this.clicked, 'Q');
+        btn.x = btn.y = 100;
+    };
+    MainState.prototype.clicked = function (sender, shortcut) {
+        console.log("clicked", shortcut, sender);
     };
     MainState.prototype.destroy = function () {
         this.renderManager.destroy();
@@ -37,6 +43,22 @@ var MainState = (function (_super) {
         this.musicPlayer.destroy();
         this.music = this.renderManager = this.audioMetronome = null;
         this.guiMetronome = this.musicPlayer = null;
+    };
+    MainState.prototype.setPosition = function (barFractionalPosition) {
+        this.barFractionalPosition = barFractionalPosition;
+        this.lastFractionalPosition = -1;
+    };
+    MainState.prototype.setTempo = function (tempo) {
+        this.tempo = tempo;
+    };
+    MainState.prototype.getPosition = function () {
+        return this.barFractionalPosition;
+    };
+    MainState.prototype.getTempo = function () {
+        return this.tempo;
+    };
+    MainState.prototype.getDefaultTempo = function () {
+        return this.music.getTempo();
     };
     MainState.prototype.update = function () {
         if (this.renderManager != null) {
@@ -47,10 +69,13 @@ var MainState = (function (_super) {
                 var barsElapsed = beatsElapsed / this.music.getBeats();
                 this.barFractionalPosition += barsElapsed;
                 this.barFractionalPosition = Math.min(this.barFractionalPosition, this.music.getBarCount());
+            }
+            if (this.barFractionalPosition != this.lastFractionalPosition) {
                 this.renderManager.updatePosition(this.barFractionalPosition);
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
+                this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
     };
@@ -88,7 +113,7 @@ var AudioMetronome = (function (_super) {
     AudioMetronome.prototype.destroy = function () {
         this.tick = null;
     };
-    AudioMetronome.prototype.setMetronome = function (isOn) {
+    AudioMetronome.prototype.setVolume = function (isOn) {
         this.metronomeOn = isOn;
     };
     AudioMetronome.prototype.updateOnQuarterBeatChange = function (bar, quarterBeat) {
@@ -150,7 +175,7 @@ var MusicPlayer = (function (_super) {
         this.music = null;
         this.tuning = null;
     };
-    MusicPlayer.prototype.setMusic = function (isOn) {
+    MusicPlayer.prototype.setVolume = function (isOn) {
         this.musicOn = isOn;
     };
     MusicPlayer.prototype.updateOnQuarterBeatChange = function (bar, quarterBeat) {
@@ -213,6 +238,45 @@ var MusicPlayer = (function (_super) {
     };
     return MusicPlayer;
 }(BaseClockEntity));
+;
+var PushButton = (function (_super) {
+    __extends(PushButton, _super);
+    function PushButton(game, image, context, callback, shortCut, width, height) {
+        if (width === void 0) { width = 0; }
+        if (height === void 0) { height = 0; }
+        var _this = _super.call(this, game) || this;
+        _this.signal = new Phaser.Signal();
+        _this.button = game.add.image(0, 0, "sprites", "icon_frame", _this);
+        _this.button.anchor.x = _this.button.anchor.y = 0.5;
+        _this.button.width = (width == 0) ? game.width / 12 : width;
+        _this.button.height = (height == 0) ? _this.button.width : height;
+        _this.btnImage = game.add.image(0, 0, "sprites", "icon_frame", _this);
+        _this.setImage(image);
+        _this.button.inputEnabled = true;
+        _this.button.events.onInputDown.add(_this.clicked, _this);
+        _this.shortCut = shortCut;
+        _this.context = context;
+        _this.callback = callback;
+        return _this;
+    }
+    PushButton.prototype.destroy = function () {
+        this.button.destroy();
+        this.btnImage.destroy();
+        this.signal.dispose();
+        this.signal = this.button = this.btnImage = this.context = this.callback = null;
+        _super.prototype.destroy.call(this);
+    };
+    PushButton.prototype.setImage = function (imageName) {
+        this.btnImage.loadTexture("sprites", imageName);
+        this.btnImage.anchor.x = this.btnImage.anchor.y = 0.5;
+        this.btnImage.width = this.button.width * 0.75;
+        this.btnImage.height = this.button.height * 0.75;
+    };
+    PushButton.prototype.clicked = function () {
+        this.callback.call(this.context, this, this.shortCut);
+    };
+    return PushButton;
+}(Phaser.Group));
 var Instrument = (function () {
     function Instrument() {
     }

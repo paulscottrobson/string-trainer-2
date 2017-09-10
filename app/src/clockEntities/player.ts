@@ -1,6 +1,6 @@
 /// <reference path="../../lib/phaser.comments.d.ts"/>
 
-class MusicPlayer extends BaseClockEntity {
+class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
 
     private notes:Phaser.Sound[];
     private music:IMusic;
@@ -31,13 +31,7 @@ class MusicPlayer extends BaseClockEntity {
         this.tuning = null;
     }
 
-    /**
-     * Turn music on or off
-     * 
-     * @param {boolean} isOn  true if on.
-     * @memberof MusicPlayer
-     */
-    setMusic(isOn:boolean) : void {
+    setVolume(isOn:boolean) : void {
         this.musicOn = isOn;
     }
 
