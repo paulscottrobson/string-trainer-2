@@ -21,6 +21,9 @@ var MainState = (function (_super) {
         var bgr = this.game.add.image(0, 0, "sprites", "background");
         bgr.width = this.game.width;
         bgr.height = this.game.height;
+        var lbl = this.game.add.bitmapText(this.game.width, this.game.height, "font", MainState.VERSION, 24);
+        lbl.anchor.x = lbl.anchor.y = 1;
+        lbl.tint = 0;
         var json = this.game.cache.getJSON("music");
         this.music = new Music(json);
         this.renderManager = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
@@ -30,7 +33,7 @@ var MainState = (function (_super) {
         this.audioMetronome = new AudioMetronome(this.game, this.music);
         this.guiMetronome = new VisualMetronome(this.game, this.music);
         this.musicPlayer = new MusicPlayer(this.game, this.music);
-        this.controller = new Controller(this.game, this);
+        this.controller = new Controller(this.game, this, MainState.BUTTON_LIST);
     };
     MainState.prototype.destroy = function () {
         this.renderManager.destroy();
@@ -62,8 +65,52 @@ var MainState = (function (_super) {
         }
     };
     MainState.prototype.doCommand = function (shortCut) {
-        console.log("Do command " + shortCut);
+        switch (shortCut) {
+            case "P":
+                this.isPaused = false;
+                break;
+            case "H":
+                this.isPaused = true;
+                break;
+            case "R":
+                this.barFractionalPosition = 0;
+                break;
+            case "S":
+                this.tempo *= 0.9;
+                break;
+            case "N":
+                this.tempo = this.music.getTempo();
+                break;
+            case "F":
+                this.tempo /= 0.9;
+                break;
+            case "M":
+                this.musicPlayer.setVolume(true);
+                break;
+            case "Q":
+                this.musicPlayer.setVolume(false);
+                break;
+            case "T":
+                this.audioMetronome.setVolume(true);
+                break;
+            case "X":
+                this.audioMetronome.setVolume(false);
+                break;
+        }
     };
+    MainState.VERSION = "0.9:11/Sep/17";
+    MainState.BUTTON_LIST = [
+        ["P", "i_play"],
+        ["H", "i_stop"],
+        ["R", "i_restart"],
+        ["S", "i_slower"],
+        ["N", "i_normal"],
+        ["F", "i_faster"],
+        ["M", "i_music_on"],
+        ["Q", "i_music_off"],
+        ["T", "i_metronome_on"],
+        ["X", "i_metronome_off"]
+    ];
     return MainState;
 }(Phaser.State));
 var BaseClockEntity = (function () {
@@ -264,15 +311,16 @@ var PushButton = (function (_super) {
 }(Phaser.Group));
 var Controller = (function (_super) {
     __extends(Controller, _super);
-    function Controller(game, controllable, alignmentHorizontal) {
+    function Controller(game, controllable, buttonInfo, alignmentHorizontal) {
         if (alignmentHorizontal === void 0) { alignmentHorizontal = true; }
         var _this = _super.call(this, game) || this;
         var xOffset = 0;
         var yOffset = 0;
         _this.controllable = controllable;
+        _this.buttonInfo = buttonInfo;
         _this.keys = [];
-        for (var n = 0; n < Controller.BUTTON_LIST.length; n++) {
-            var button = new PushButton(game, Controller.BUTTON_LIST[n][1], _this, _this.buttonClicked, Controller.BUTTON_LIST[n][0]);
+        for (var n = 0; n < _this.buttonInfo.length; n++) {
+            var button = new PushButton(game, _this.buttonInfo[n][1], _this, _this.buttonClicked, _this.buttonInfo[n][0]);
             button.x = button.width * 0.6 + xOffset;
             button.y = button.height * 0.6 + yOffset;
             if (alignmentHorizontal) {
@@ -281,7 +329,7 @@ var Controller = (function (_super) {
             else {
                 yOffset += button.height * 1.1;
             }
-            _this.keys[n] = game.input.keyboard.addKey(Controller.BUTTON_LIST[n][0].charCodeAt(0));
+            _this.keys[n] = game.input.keyboard.addKey(_this.buttonInfo[n][0].charCodeAt(0));
         }
         return _this;
     }
@@ -289,7 +337,7 @@ var Controller = (function (_super) {
         if (this.keys != null && this.keys.length > 0) {
             for (var n = 0; n < this.keys.length; n++) {
                 if (this.keys[n].justDown) {
-                    this.controllable.doCommand(Controller.BUTTON_LIST[n][0]);
+                    this.controllable.doCommand(this.buttonInfo[n][0]);
                 }
             }
         }
@@ -298,22 +346,11 @@ var Controller = (function (_super) {
         _super.prototype.destroy.call(this);
         this.controllable = null;
         this.keys = null;
+        this.buttonInfo = null;
     };
     Controller.prototype.buttonClicked = function (clicker, shortCut) {
         this.controllable.doCommand(shortCut);
     };
-    Controller.BUTTON_LIST = [
-        ["P", "i_play"],
-        ["H", "i_stop"],
-        ["R", "i_restart"],
-        ["S", "i_slower"],
-        ["N", "i_normal"],
-        ["F", "i_faster"],
-        ["M", "i_music_on"],
-        ["Q", "i_music_off"],
-        ["T", "i_metronome_on"],
-        ["X", "i_metronome_off"]
-    ];
     return Controller;
 }(Phaser.Group));
 var Instrument = (function () {
@@ -960,7 +997,7 @@ var StringRenderManager = (function (_super) {
         return this.game.width / 4 + (-fracPos + bar) * this.getBoxWidth();
     };
     StringRenderManager.prototype.getYBox = function (fracPos, bar) {
-        return this.game.height - 100 - this.getBoxHeight();
+        return this.game.height - 150 - this.getBoxHeight();
     };
     return StringRenderManager;
 }(BaseRenderManager));

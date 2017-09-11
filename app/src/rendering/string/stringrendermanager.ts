@@ -49,7 +49,7 @@ class StringRenderManager extends BaseRenderManager {
     }
 
     getYBox(fracPos:number,bar:number) {
-        return this.game.height - 100 - this.getBoxHeight();
+        return this.game.height - 150 - this.getBoxHeight();
     }
 
 }
