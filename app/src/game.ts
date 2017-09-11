@@ -20,6 +20,7 @@ class MainState extends Phaser.State implements IControllable {
     private musicPlayer:IClockAudioEntity;
     private lastFractionalPosition:number;
     private controller:IController;
+    private positionBar:IPositionBar;
 
     create() : void {
         // Stretched background
@@ -48,6 +49,7 @@ class MainState extends Phaser.State implements IControllable {
         this.audioMetronome = new AudioMetronome(this.game,this.music);
         this.guiMetronome = new VisualMetronome(this.game,this.music);
         this.musicPlayer = new MusicPlayer(this.game,this.music);
+        this.positionBar = new PositionBar(this.game,this.music,50,this.game.width-50,this.game.height-50);
         this.controller = new Controller(this.game,this,MainState.BUTTON_LIST);
     }
 
@@ -84,7 +86,8 @@ class MainState extends Phaser.State implements IControllable {
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
-                   this.lastFractionalPosition = this.barFractionalPosition;
+                this.positionBar.updatePosition(this.barFractionalPosition);
+                this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
     }

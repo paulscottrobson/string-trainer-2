@@ -33,7 +33,7 @@ class Controller extends Phaser.Group implements IController {
             } else {
                 yOffset += button.height * 1.1;
             }                
-            this.keys[n] = game.input.keyboard.addKey(this.buttonInfo[n][0].charCodeAt(0));                                   
+            //this.keys[n] = game.input.keyboard.addKey(this.buttonInfo[n][0].charCodeAt(0));                                   
         }   
     }
 

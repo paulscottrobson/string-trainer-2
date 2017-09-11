@@ -33,6 +33,7 @@ var MainState = (function (_super) {
         this.audioMetronome = new AudioMetronome(this.game, this.music);
         this.guiMetronome = new VisualMetronome(this.game, this.music);
         this.musicPlayer = new MusicPlayer(this.game, this.music);
+        this.positionBar = new PositionBar(this.game, this.music, 50, this.game.width - 50, this.game.height - 50);
         this.controller = new Controller(this.game, this, MainState.BUTTON_LIST);
     };
     MainState.prototype.destroy = function () {
@@ -60,6 +61,7 @@ var MainState = (function (_super) {
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
+                this.positionBar.updatePosition(this.barFractionalPosition);
                 this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
@@ -329,7 +331,6 @@ var Controller = (function (_super) {
             else {
                 yOffset += button.height * 1.1;
             }
-            _this.keys[n] = game.input.keyboard.addKey(_this.buttonInfo[n][0].charCodeAt(0));
         }
         return _this;
     }
@@ -352,6 +353,58 @@ var Controller = (function (_super) {
         this.controllable.doCommand(shortCut);
     };
     return Controller;
+}(Phaser.Group));
+var DraggableSphere = (function () {
+    function DraggableSphere(game, xStart, yStart, colour) {
+        this.sphere = game.add.image(xStart, yStart, "sprites", "sphere_" + colour);
+        this.sphere.anchor.x = this.sphere.anchor.y = 0.5;
+        this.sphere.height = this.sphere.width = 80;
+        this.sphere.inputEnabled = true;
+        this.sphere.input.enableDrag();
+        this.sphere.input.setDragLock(true, false);
+    }
+    DraggableSphere.prototype.moveTo = function (x, y) {
+        this.sphere.x = x;
+        this.sphere.y = y;
+    };
+    DraggableSphere.prototype.destroy = function () {
+        this.sphere.destroy();
+        this.sphere = null;
+    };
+    return DraggableSphere;
+}());
+var PositionBar = (function (_super) {
+    __extends(PositionBar, _super);
+    function PositionBar(game, music, xLeft, xRight, y) {
+        var _this = _super.call(this, game) || this;
+        var bar = _this.game.add.image(xLeft, y, "sprites", "rectangle", _this);
+        bar.width = xRight - xLeft;
+        bar.height = 16;
+        bar.tint = 0x0000;
+        bar.anchor.y = 0.5;
+        _this.xLeft = xLeft;
+        _this.xRight = xRight;
+        _this.yPos = y;
+        _this.music = music;
+        _this.spheres = [];
+        _this.spheres.push(new DraggableSphere(game, xLeft, y, "green"));
+        _this.spheres.push(new DraggableSphere(game, xRight, y, "green"));
+        _this.spheres.push(new DraggableSphere(game, (xLeft + xRight) / 2, y, "orange"));
+        return _this;
+    }
+    PositionBar.prototype.updatePosition = function (barFractionalPosition) {
+        var frac = barFractionalPosition / this.music.getBarCount();
+        frac = Math.min(1, frac);
+        this.spheres[2].moveTo(this.xLeft + (this.xRight - this.xLeft) * frac, this.yPos);
+    };
+    PositionBar.prototype.destroy = function () {
+        for (var _i = 0, _a = this.spheres; _i < _a.length; _i++) {
+            var ds = _a[_i];
+            ds.destroy();
+        }
+        _super.prototype.destroy.call(this);
+    };
+    return PositionBar;
 }(Phaser.Group));
 var Instrument = (function () {
     function Instrument() {
