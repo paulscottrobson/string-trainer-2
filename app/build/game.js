@@ -26,42 +26,24 @@ var MainState = (function (_super) {
         this.renderManager = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
         this.barFractionalPosition = 0;
         this.lastFractionalPosition = -1;
-        this.tempo = this.getDefaultTempo();
+        this.tempo = this.music.getTempo();
         this.audioMetronome = new AudioMetronome(this.game, this.music);
         this.guiMetronome = new VisualMetronome(this.game, this.music);
         this.musicPlayer = new MusicPlayer(this.game, this.music);
-        var btn = new PushButton(this.game, "i_faster", this, this.clicked, 'Q');
-        btn.x = btn.y = 100;
-    };
-    MainState.prototype.clicked = function (sender, shortcut) {
-        console.log("clicked", shortcut, sender);
+        this.controller = new Controller(this.game, this);
     };
     MainState.prototype.destroy = function () {
         this.renderManager.destroy();
         this.audioMetronome.destroy();
         this.guiMetronome.destroy();
         this.musicPlayer.destroy();
+        this.controller.destroy();
         this.music = this.renderManager = this.audioMetronome = null;
-        this.guiMetronome = this.musicPlayer = null;
-    };
-    MainState.prototype.setPosition = function (barFractionalPosition) {
-        this.barFractionalPosition = barFractionalPosition;
-        this.lastFractionalPosition = -1;
-    };
-    MainState.prototype.setTempo = function (tempo) {
-        this.tempo = tempo;
-    };
-    MainState.prototype.getPosition = function () {
-        return this.barFractionalPosition;
-    };
-    MainState.prototype.getTempo = function () {
-        return this.tempo;
-    };
-    MainState.prototype.getDefaultTempo = function () {
-        return this.music.getTempo();
+        this.guiMetronome = this.musicPlayer = this.controller = null;
     };
     MainState.prototype.update = function () {
         if (this.renderManager != null) {
+            this.controller.checkUpdateController();
             if (!this.isPaused) {
                 var time = this.game.time.elapsedMS;
                 time = time / 1000 / 60;
@@ -78,6 +60,9 @@ var MainState = (function (_super) {
                 this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
+    };
+    MainState.prototype.doCommand = function (shortCut) {
+        console.log("Do command " + shortCut);
     };
     return MainState;
 }(Phaser.State));
@@ -248,7 +233,7 @@ var PushButton = (function (_super) {
         _this.signal = new Phaser.Signal();
         _this.button = game.add.image(0, 0, "sprites", "icon_frame", _this);
         _this.button.anchor.x = _this.button.anchor.y = 0.5;
-        _this.button.width = (width == 0) ? game.width / 12 : width;
+        _this.button.width = (width == 0) ? game.width / 16 : width;
         _this.button.height = (height == 0) ? _this.button.width : height;
         _this.btnImage = game.add.image(0, 0, "sprites", "icon_frame", _this);
         _this.setImage(image);
@@ -276,6 +261,60 @@ var PushButton = (function (_super) {
         this.callback.call(this.context, this, this.shortCut);
     };
     return PushButton;
+}(Phaser.Group));
+var Controller = (function (_super) {
+    __extends(Controller, _super);
+    function Controller(game, controllable, alignmentHorizontal) {
+        if (alignmentHorizontal === void 0) { alignmentHorizontal = true; }
+        var _this = _super.call(this, game) || this;
+        var xOffset = 0;
+        var yOffset = 0;
+        _this.controllable = controllable;
+        _this.keys = [];
+        for (var n = 0; n < Controller.BUTTON_LIST.length; n++) {
+            var button = new PushButton(game, Controller.BUTTON_LIST[n][1], _this, _this.buttonClicked, Controller.BUTTON_LIST[n][0]);
+            button.x = button.width * 0.6 + xOffset;
+            button.y = button.height * 0.6 + yOffset;
+            if (alignmentHorizontal) {
+                xOffset += button.width * 1.1;
+            }
+            else {
+                yOffset += button.height * 1.1;
+            }
+            _this.keys[n] = game.input.keyboard.addKey(Controller.BUTTON_LIST[n][0].charCodeAt(0));
+        }
+        return _this;
+    }
+    Controller.prototype.checkUpdateController = function () {
+        if (this.keys != null && this.keys.length > 0) {
+            for (var n = 0; n < this.keys.length; n++) {
+                if (this.keys[n].justDown) {
+                    this.controllable.doCommand(Controller.BUTTON_LIST[n][0]);
+                }
+            }
+        }
+    };
+    Controller.prototype.destroy = function () {
+        _super.prototype.destroy.call(this);
+        this.controllable = null;
+        this.keys = null;
+    };
+    Controller.prototype.buttonClicked = function (clicker, shortCut) {
+        this.controllable.doCommand(shortCut);
+    };
+    Controller.BUTTON_LIST = [
+        ["P", "i_play"],
+        ["H", "i_stop"],
+        ["R", "i_restart"],
+        ["S", "i_slower"],
+        ["N", "i_normal"],
+        ["F", "i_faster"],
+        ["M", "i_music_on"],
+        ["Q", "i_music_off"],
+        ["T", "i_metronome_on"],
+        ["X", "i_metronome_off"]
+    ];
+    return Controller;
 }(Phaser.Group));
 var Instrument = (function () {
     function Instrument() {

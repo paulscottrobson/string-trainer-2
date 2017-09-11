@@ -22,7 +22,7 @@ class PushButton extends Phaser.Group implements IGuiObject {
         this.signal = new Phaser.Signal();
         this.button = game.add.image(0,0,"sprites","icon_frame",this);
         this.button.anchor.x = this.button.anchor.y = 0.5;
-        this.button.width = (width == 0) ? game.width / 12 : width;
+        this.button.width = (width == 0) ? game.width / 16 : width;
         this.button.height = (height == 0) ? this.button.width : height;
         this.btnImage = game.add.image(0,0,"sprites","icon_frame",this);
         this.setImage(image);

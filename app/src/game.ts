@@ -11,6 +11,7 @@ class MainState extends Phaser.State implements IControllable {
     private guiMetronome:IClockEntity;
     private musicPlayer:IClockAudioEntity;
     private lastFractionalPosition:number;
+    private controller:IController;
 
     create() : void {
         // Stretched background
@@ -29,17 +30,11 @@ class MainState extends Phaser.State implements IControllable {
         this.barFractionalPosition = 0;
         this.lastFractionalPosition = -1;
 
-        this.tempo = this.getDefaultTempo();
+        this.tempo = this.music.getTempo();
         this.audioMetronome = new AudioMetronome(this.game,this.music);
         this.guiMetronome = new VisualMetronome(this.game,this.music);
         this.musicPlayer = new MusicPlayer(this.game,this.music);
-
-        var btn:IGuiObject = new PushButton(this.game,"i_faster",this,this.clicked,'Q');
-        btn.x = btn.y = 100;
-    }
-
-    clicked(sender:any,shortcut:string) : void {
-        console.log("clicked",shortcut,sender);
+        this.controller = new Controller(this.game,this);
     }
 
     destroy() : void {
@@ -47,33 +42,14 @@ class MainState extends Phaser.State implements IControllable {
         this.audioMetronome.destroy();
         this.guiMetronome.destroy();
         this.musicPlayer.destroy();
+        this.controller.destroy();
         this.music = this.renderManager = this.audioMetronome = null;
-        this.guiMetronome = this.musicPlayer = null;
-    }
-
-    setPosition(barFractionalPosition:number) : void {
-        this.barFractionalPosition = barFractionalPosition;
-        this.lastFractionalPosition = -1;
-    }
-    
-    setTempo(tempo:number) : void {
-        this.tempo = tempo;
-    }
-
-    getPosition(): number  {
-        return this.barFractionalPosition;
-    }
-
-    getTempo(): number { 
-        return this.tempo;
-    }
-
-    getDefaultTempo(): number {
-        return this.music.getTempo();
+        this.guiMetronome = this.musicPlayer = this.controller = null;
     }
 
     update() : void {
         if (this.renderManager != null) {
+            this.controller.checkUpdateController();
             if (!this.isPaused) {
                 // Elapsed ms time.
                 var time:number = this.game.time.elapsedMS;
@@ -94,8 +70,13 @@ class MainState extends Phaser.State implements IControllable {
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
-                this.lastFractionalPosition = this.barFractionalPosition;
+                   this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
     }
+
+    doCommand(shortCut:string):void {
+        console.log("Do command "+shortCut);
+    }
+
 }    
