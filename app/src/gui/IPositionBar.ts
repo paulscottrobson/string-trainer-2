@@ -2,5 +2,5 @@
 
 interface IPositionBar {
     
-    updatePosition(barFractionalPosition:number): void;
+    updatePosition(barFractionalPosition:number): number;
 }

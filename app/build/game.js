@@ -48,6 +48,8 @@ var MainState = (function (_super) {
     MainState.prototype.update = function () {
         if (this.renderManager != null) {
             this.controller.checkUpdateController();
+            this.barFractionalPosition =
+                this.positionBar.updatePosition(this.barFractionalPosition);
             if (!this.isPaused) {
                 var time = this.game.time.elapsedMS;
                 time = time / 1000 / 60;
@@ -61,7 +63,6 @@ var MainState = (function (_super) {
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
-                this.positionBar.updatePosition(this.barFractionalPosition);
                 this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
@@ -355,14 +356,18 @@ var Controller = (function (_super) {
     return Controller;
 }(Phaser.Group));
 var DraggableSphere = (function () {
-    function DraggableSphere(game, xStart, yStart, colour) {
+    function DraggableSphere(game, owner, xStart, yStart, colour) {
         this.sphere = game.add.image(xStart, yStart, "sprites", "sphere_" + colour);
         this.sphere.anchor.x = this.sphere.anchor.y = 0.5;
         this.sphere.height = this.sphere.width = 80;
         this.sphere.inputEnabled = true;
         this.sphere.input.enableDrag();
         this.sphere.input.setDragLock(true, false);
+        this.sphere.events.onDragStop.add(owner.updatePositionsOnDrop, owner);
     }
+    DraggableSphere.prototype.setBounds = function (xStart, xEnd, y) {
+        this.sphere.input.boundsRect = new Phaser.Rectangle(xStart, y - 100, xEnd - xStart, y + 100);
+    };
     DraggableSphere.prototype.moveTo = function (x, y) {
         this.sphere.x = x;
         this.sphere.y = y;
@@ -370,6 +375,12 @@ var DraggableSphere = (function () {
     DraggableSphere.prototype.destroy = function () {
         this.sphere.destroy();
         this.sphere = null;
+    };
+    DraggableSphere.prototype.getX = function () {
+        return this.sphere.x;
+    };
+    DraggableSphere.prototype.isDragging = function () {
+        return this.sphere.input.isDragged;
     };
     return DraggableSphere;
 }());
@@ -387,15 +398,35 @@ var PositionBar = (function (_super) {
         _this.yPos = y;
         _this.music = music;
         _this.spheres = [];
-        _this.spheres.push(new DraggableSphere(game, xLeft, y, "green"));
-        _this.spheres.push(new DraggableSphere(game, xRight, y, "green"));
-        _this.spheres.push(new DraggableSphere(game, (xLeft + xRight) / 2, y, "orange"));
+        _this.spheres.push(new DraggableSphere(game, _this, xLeft, y, "red"));
+        _this.spheres.push(new DraggableSphere(game, _this, xRight, y, "green"));
+        _this.spheres.push(new DraggableSphere(game, _this, (xLeft + xRight) / 2, y, "yellow"));
+        for (var _i = 0, _a = _this.spheres; _i < _a.length; _i++) {
+            var sphere = _a[_i];
+            sphere.setBounds(xLeft, xRight, y);
+        }
         return _this;
     }
     PositionBar.prototype.updatePosition = function (barFractionalPosition) {
-        var frac = barFractionalPosition / this.music.getBarCount();
-        frac = Math.min(1, frac);
-        this.spheres[2].moveTo(this.xLeft + (this.xRight - this.xLeft) * frac, this.yPos);
+        if (!this.spheres[2].isDragging()) {
+            var frac = barFractionalPosition / this.music.getBarCount();
+            frac = Math.min(1, frac);
+            this.spheres[2].moveTo(this.xLeft + (this.xRight - this.xLeft) * frac, this.yPos);
+        }
+        var xPos = this.spheres[2].getX();
+        xPos = Math.max(xPos, this.spheres[0].getX());
+        if (xPos > this.spheres[1].getX())
+            xPos = this.spheres[0].getX();
+        if (xPos != this.spheres[2].getX()) {
+            barFractionalPosition = this.music.getBarCount() *
+                (xPos - this.xLeft) / (this.xRight - this.xLeft);
+        }
+        return barFractionalPosition;
+    };
+    PositionBar.prototype.updatePositionsOnDrop = function () {
+        if (this.spheres[0].getX() + 50 >= this.spheres[1].getX()) {
+            this.spheres[0].moveTo(Math.max(this.spheres[1].getX() - 50, 0), this.yPos);
+        }
     };
     PositionBar.prototype.destroy = function () {
         for (var _i = 0, _a = this.spheres; _i < _a.length; _i++) {

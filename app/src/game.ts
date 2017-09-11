@@ -66,6 +66,8 @@ class MainState extends Phaser.State implements IControllable {
     update() : void {
         if (this.renderManager != null) {
             this.controller.checkUpdateController();
+            this.barFractionalPosition = 
+                    this.positionBar.updatePosition(this.barFractionalPosition);            
             if (!this.isPaused) {
                 // Elapsed ms time.
                 var time:number = this.game.time.elapsedMS;
@@ -86,7 +88,6 @@ class MainState extends Phaser.State implements IControllable {
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
-                this.positionBar.updatePosition(this.barFractionalPosition);
                 this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
