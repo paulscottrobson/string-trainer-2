@@ -506,6 +506,19 @@ var MountainDulcimer = (function (_super) {
     };
     return MountainDulcimer;
 }(DiatonicStringInstrument));
+var Harmonica = (function (_super) {
+    __extends(Harmonica, _super);
+    function Harmonica() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Harmonica.prototype.getDefaultTuning = function () {
+        return "c4,c4,c4";
+    };
+    Harmonica.prototype.getStringCount = function () {
+        return 3;
+    };
+    return Harmonica;
+}(StringInstrument));
 var Mandolin = (function (_super) {
     __extends(Mandolin, _super);
     function Mandolin() {
@@ -659,6 +672,9 @@ var Music = (function () {
                 break;
             case "mandolin":
                 iObj = new Mandolin();
+                break;
+            case "harmonica":
+                iObj = new Harmonica();
                 break;
             default:
                 throw new Error("Not implemented.");

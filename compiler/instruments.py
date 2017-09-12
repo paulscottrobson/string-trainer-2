@@ -6,6 +6,7 @@
 # ***********************************************************************************************************
 # ***********************************************************************************************************
 
+import re
 from exceptions import CompilerException
 from note import Note 
 
@@ -129,4 +130,26 @@ class Dulcimer(BaseInstrument):
 	def getSubtype(self):
 		return ""
 
+class Harmonica(BaseInstrument):
 
+	def getName(self):
+		return "harmonica"
+	def getSubtype(self):
+		return ""
+	def getVoices(self):
+		return 3
+
+	def extractNoteElement(self):
+		#print("<"+self.definition+">")
+		if self.definition == "":
+			return None
+		draw = False
+		if self.definition[0] == "-":
+			draw = True
+			self.definition = self.definition[1:]
+		m = re.match("^([0-9]+)(.*)$",self.definition)
+		if m is None:
+			raise CompilerException("Unknown note '"+self.definition+"'")
+		noteID = int(m.group(1))
+		self.definition = m.group(2)
+		return noteID

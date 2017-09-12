@@ -1,0 +1,22 @@
+#
+#	Love me do by the Beatles
+#
+
+Title := Love me Do 
+Composer := The Beatles
+Beats := 4
+Speed := 100
+Harmonica := Diatonic
+Key := C
+
+ -4o   -4  5-  6- 
+# Love, love me do. 
+
+& & & 4 |  -4o -4  5-    6- 
+# You know I love you, 
+
+& & & 4 |  -4o  -4     5-    6- 
+# I'll al-ways be true, 
+
+& & & -5 |   6o -5 5 | 6ooo | & & 3 3 | -5- 5- -[3,4,5]oo 
+# So please- - -, love me do - - . 

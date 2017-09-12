@@ -1,1 +1,5 @@
-Think about Harmonica implementation.
+Make harmonica compiler generate the correct chromatic notes
+Fix the single->multiple tuning issue (if 1 tuning and n voices, duplicate it). Remove c4,c4,c4 fudges
+Fix to use the harmonica notes.
+Convert the display numbers back to actual values
+Render harmonica stuff.

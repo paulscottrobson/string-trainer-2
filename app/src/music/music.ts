@@ -106,6 +106,8 @@ class Music implements IMusic {
                 iObj = new Ukulele();break;
             case "mandolin":
                 iObj = new Mandolin();break;
+            case "harmonica":
+                iObj = new Harmonica();break;
             default:
                 throw new Error("Not implemented.");
         }

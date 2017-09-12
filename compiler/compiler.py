@@ -109,7 +109,13 @@ class Compiler:
 Compiler.ASSIGNS = { "title":"","instrument":"","subtype":"","tuning":"","capo":"0","beats":"4", \
 					 "speed":"100","composer":"","translator":"" }
 
-instrument = instruments.Dulcimer()		
+dulcimer = instruments.Dulcimer()	
+harmonica = instruments.Harmonica()
+
 compiler = Compiler()
-compiler.compile(instrument,open("waterbound.music"),sys.stdout,sys.stdout)
-compiler.compile(instrument,open("waterbound.music"),open("../app/music.json","w"),sys.stdout)
+#compiler.compile(dulcimer,open("waterbound.music"),sys.stdout,sys.stdout)
+#compiler.compile(dulcimer,open("waterbound.music"),open("../app/music.json","w"),sys.stdout)
+
+compiler.compile(harmonica,open("ode_to_joy.harp"),sys.stdout,sys.stdout)
+compiler.compile(harmonica,open("ode_to_joy.harp"),open("../app/music.json","w"),sys.stdout)
+
