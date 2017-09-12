@@ -1,0 +1,15 @@
+#
+#	Waterbound, from Madelaine McNeil's book, slightly modded for testing purposes.
+#
+#	Note Dulcimer TAB is upside down, with the highest string at the bottom.
+#
+title := waterbound
+instrument := dulcimer
+tuning := d3,a3,a3
+capo := 0
+beats := 4
+speed := 120
+composer := classical
+
+405 404 203 203- 203- | 405 404 203 & | 404 404 405 405- 405- | 303 301 000o
+000 001 003 003- 003- | 035 057 068 068 | 057 035 404 [fin] 404- 404- | 003o 003o
