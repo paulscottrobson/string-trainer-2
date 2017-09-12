@@ -50,7 +50,7 @@ abstract class BaseRenderManager extends Phaser.Group implements IRenderManager 
         if (currentBar < this.music.getBarCount()) {
             var xBall:number = this.renderers[currentBar].getXBall(fracPosPart);
             var yBall:number = this.renderers[currentBar].getYBall(fracPosPart);
-            if (xBall != null && yBall != null) {
+            if (xBall != null &&     yBall != null) {
                 this.bouncingBall.visible = true;
                 this.bouncingBall.bringToTop();
                 this.bouncingBall.x = this.getXBox(fracPos,currentBar) + xBall;

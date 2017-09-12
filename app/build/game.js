@@ -21,9 +21,10 @@ var MainState = (function (_super) {
         var bgr = this.game.add.image(0, 0, "sprites", "background");
         bgr.width = this.game.width;
         bgr.height = this.game.height;
-        var lbl = this.game.add.bitmapText(this.game.width, this.game.height, "font", MainState.VERSION, 24);
-        lbl.anchor.x = lbl.anchor.y = 1;
-        lbl.tint = 0;
+        var lbl = this.game.add.bitmapText(this.game.width / 2, this.game.height, "font", "by Paul Robson v" + MainState.VERSION, 24);
+        lbl.anchor.x = 0.5;
+        lbl.anchor.y = 1;
+        lbl.tint = 0xFFFF00;
         var json = this.game.cache.getJSON("music");
         this.music = new Music(json);
         this.renderManager = new StringRenderManager(this.game, this.music.getInstrument(), this.music);
@@ -101,7 +102,7 @@ var MainState = (function (_super) {
                 break;
         }
     };
-    MainState.VERSION = "0.9:11/Sep/17";
+    MainState.VERSION = "0.91:12/Sep/17";
     MainState.BUTTON_LIST = [
         ["P", "i_play"],
         ["H", "i_stop"],
@@ -834,6 +835,7 @@ var BaseRenderer = (function (_super) {
         _this.rHeight = height;
         _this.bar = bar;
         _this.instrument = instrument;
+        _this.beats = _this.bar.getBeats();
         _this.xiLast = _this.yiLast = -999999;
         _this.debugRectangle = null;
         if (BaseRenderer.SHOW_DEBUG) {
@@ -916,6 +918,77 @@ var TestRenderer = (function (_super) {
     };
     return TestRenderer;
 }(BaseRenderer));
+var BounceBaseRenderer = (function (_super) {
+    __extends(BounceBaseRenderer, _super);
+    function BounceBaseRenderer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    BounceBaseRenderer.prototype.moveAllObjects = function (x, y) {
+        for (var n = 0; n < this.sineList.length; n++) {
+            this.sineList[n].x = x + this.sineStartTime[n] * this.rWidth / (this.bar.getBeats() * 4);
+            this.sineList[n].y = y + this.getSinePositionOffset();
+        }
+    };
+    BounceBaseRenderer.prototype.drawAllObjects = function () {
+        this.sineList = [];
+        this.sineStartTime = [];
+        this.sineEndTime = [];
+        if (this.bar.getStrumCount() == 0) {
+            for (var n = 0; n < this.beats; n++) {
+                this.addSineGraphic(n * 4, (n + 1) * 4);
+            }
+        }
+        else {
+            this.addSineGraphic(0, this.bar.getStrum(0).getStartTime());
+            for (var n = 0; n < this.bar.getStrumCount(); n++) {
+                this.addSineGraphic(this.bar.getStrum(n).getStartTime(), this.bar.getStrum(n).getEndTime());
+            }
+            this.addSineGraphic(this.bar.getStrum(this.bar.getStrumCount() - 1).getEndTime(), this.beats * 4);
+        }
+    };
+    BounceBaseRenderer.prototype.eraseAllObjects = function () {
+        for (var _i = 0, _a = this.sineList; _i < _a.length; _i++) {
+            var img2 = _a[_i];
+            img2.destroy();
+        }
+        this.sineList = this.sineStartTime = this.sineEndTime = null;
+    };
+    BounceBaseRenderer.prototype.getSinePositionOffset = function () {
+        return 0;
+    };
+    BounceBaseRenderer.prototype.addSineGraphic = function (start, end) {
+        if (start != end) {
+            var sineHeight = this.getSineCurveHeight();
+            var sineWidth = (end - start) * this.rWidth / (this.bar.getBeats() * 4);
+            var img = this.game.add.image(0, 0, "sprites", (sineWidth / sineHeight > 1.4) ? "sinecurve_wide" : "sinecurve", this);
+            img.width = sineWidth;
+            img.height = sineHeight;
+            img.anchor.y = 1;
+            this.sineList.push(img);
+            this.sineStartTime.push(start);
+            this.sineEndTime.push(end);
+        }
+    };
+    BounceBaseRenderer.prototype.getXBall = function (fractionalBar) {
+        return fractionalBar * this.rWidth;
+    };
+    BounceBaseRenderer.prototype.getYBall = function (fractionalBar) {
+        var qbPos = fractionalBar * this.bar.getBeats() * 4;
+        for (var n = 0; n < this.sineList.length; n++) {
+            if (qbPos >= this.sineStartTime[n] && qbPos < this.sineEndTime[n]) {
+                var prop = (qbPos - this.sineStartTime[n]) / (this.sineEndTime[n] - this.sineStartTime[n]);
+                var offset = Math.sin(prop * Math.PI);
+                offset = offset * this.getSineCurveHeight();
+                return this.getSinePositionOffset() - offset;
+            }
+        }
+        return 0;
+    };
+    BounceBaseRenderer.prototype.getSineCurveHeight = function () {
+        return this.game.height / 6;
+    };
+    return BounceBaseRenderer;
+}(BaseRenderer));
 var StringRenderer = (function (_super) {
     __extends(StringRenderer, _super);
     function StringRenderer() {
@@ -940,18 +1013,12 @@ var StringRenderer = (function (_super) {
                 }
             }
         }
-        for (var n = 0; n < this.sineList.length; n++) {
-            this.sineList[n].x = x + this.sineStartTime[n] * this.rWidth / (this.bar.getBeats() * 4);
-            this.sineList[n].y = y + this.getSinePositionOffset();
-        }
+        _super.prototype.moveAllObjects.call(this, x, y);
         this.barMarker.x = x;
         this.barMarker.y = y;
     };
     StringRenderer.prototype.drawAllObjects = function () {
         this.markerList = [];
-        this.sineList = [];
-        this.sineStartTime = [];
-        this.sineEndTime = [];
         this.barMarker = this.game.add.image(0, 0, "sprites", "bar", this);
         this.barMarker.anchor.x = 0.5;
         this.barMarker.height = this.rHeight;
@@ -971,68 +1038,22 @@ var StringRenderer = (function (_super) {
                 }
             }
         }
-        if (this.bar.getStrumCount() == 0) {
-            for (var n = 0; n < beats; n++) {
-                this.addSineGraphic(n * 4, (n + 1) * 4);
-            }
-        }
-        else {
-            this.addSineGraphic(0, this.bar.getStrum(0).getStartTime());
-            for (var n = 0; n < this.bar.getStrumCount(); n++) {
-                this.addSineGraphic(this.bar.getStrum(n).getStartTime(), this.bar.getStrum(n).getEndTime());
-            }
-            this.addSineGraphic(this.bar.getStrum(this.bar.getStrumCount() - 1).getEndTime(), beats * 4);
-        }
+        _super.prototype.drawAllObjects.call(this);
     };
     StringRenderer.prototype.eraseAllObjects = function () {
+        _super.prototype.eraseAllObjects.call(this);
         for (var _i = 0, _a = this.markerList; _i < _a.length; _i++) {
             var img = _a[_i];
             img.destroy();
         }
-        for (var _b = 0, _c = this.sineList; _b < _c.length; _b++) {
-            var img2 = _c[_b];
-            img2.destroy();
-        }
         this.barMarker.destroy();
         this.barMarker = null;
-        this.markerList = this.sineList = this.sineStartTime = this.sineEndTime = null;
+        this.markerList = null;
     };
-    StringRenderer.prototype.getSinePositionOffset = function () {
-        return -this.rHeight / 2;
-    };
-    StringRenderer.prototype.addSineGraphic = function (start, end) {
-        if (start != end) {
-            var sineHeight = this.rHeight * StringRenderer.SINE_HEIGHT_SCALAR;
-            var sineWidth = (end - start) * this.rWidth / (this.bar.getBeats() * 4);
-            var img = this.game.add.image(0, 0, "sprites", (sineWidth / sineHeight > 1.4) ? "sinecurve_wide" : "sinecurve", this);
-            img.width = sineWidth;
-            img.height = sineHeight;
-            img.anchor.y = 0;
-            this.sineList.push(img);
-            this.sineStartTime.push(start);
-            this.sineEndTime.push(end);
-        }
-    };
-    StringRenderer.prototype.getXBall = function (fractionalBar) {
-        return fractionalBar * this.rWidth;
-    };
-    StringRenderer.prototype.getYBall = function (fractionalBar) {
-        var qbPos = fractionalBar * this.bar.getBeats() * 4;
-        for (var n = 0; n < this.sineList.length; n++) {
-            if (qbPos >= this.sineStartTime[n] && qbPos < this.sineEndTime[n]) {
-                var prop = (qbPos - this.sineStartTime[n]) / (this.sineEndTime[n] - this.sineStartTime[n]);
-                var offset = Math.sin(prop * Math.PI);
-                offset = offset * this.rHeight * StringRenderer.SINE_HEIGHT_SCALAR;
-                return -offset;
-            }
-        }
-        return 0;
-    };
-    StringRenderer.SINE_HEIGHT_SCALAR = 0.5;
     StringRenderer._colours = [0xFF0000, 0x00FF00, 0x0040FF, 0xFFFF00, 0x00FFFF, 0xFF00FF, 0xFF8000,
         0x808080, 0xFFFFFF, 0x8B4513];
     return StringRenderer;
-}(BaseRenderer));
+}(BounceBaseRenderer));
 var StringRendererFactory = (function () {
     function StringRendererFactory() {
     }

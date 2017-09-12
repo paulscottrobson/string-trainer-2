@@ -18,6 +18,7 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
     protected rHeight:number;
     protected bar:IBar;
     protected instrument:IInstrument;
+    protected beats:number;
 
     private debugRectangle:Phaser.Image;
     private xiLast:number;
@@ -46,8 +47,10 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
         this.isDrawn = false;
         this.rWidth = width;this.rHeight = height;
         this.bar = bar;this.instrument = instrument;
+        this.beats = this.bar.getBeats();
         this.xiLast = this.yiLast = -999999;
         this.debugRectangle = null;
+        
         if (BaseRenderer.SHOW_DEBUG) {
             this.debugRectangle = this.game.add.image(0,0,"sprites","rectangle",this);
             this.debugRectangle.width = width;this.debugRectangle.height = height;

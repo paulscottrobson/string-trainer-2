@@ -9,18 +9,19 @@
  */
 class MainState extends Phaser.State implements IControllable {
 
-    private static VERSION:string="0.9:11/Sep/17";
+    private static VERSION:string="0.91:12/Sep/17";
     private renderManager: IRenderManager;
+    private audioMetronome:IClockAudioEntity;
+    private guiMetronome:IClockEntity;
+    private musicPlayer:IClockAudioEntity;
+    private controller:IController;
+    private positionBar:IPositionBar;
+
+    private lastFractionalPosition:number;
     private music:IMusic;
     private barFractionalPosition:number = 0;
     private isPaused:boolean = false;
     private tempo:number = 120;
-    private audioMetronome:IClockAudioEntity;
-    private guiMetronome:IClockEntity;
-    private musicPlayer:IClockAudioEntity;
-    private lastFractionalPosition:number;
-    private controller:IController;
-    private positionBar:IPositionBar;
 
     create() : void {
         // Stretched background
@@ -28,12 +29,13 @@ class MainState extends Phaser.State implements IControllable {
         bgr.width = this.game.width;bgr.height = this.game.height;
 
         // Info Label
-        var lbl:Phaser.BitmapText = this.game.add.bitmapText(this.game.width,this.game.height,
-                                                             "font",MainState.VERSION,
+        var lbl:Phaser.BitmapText = this.game.add.bitmapText(this.game.width/2,this.game.height,
+                                                             "font",
+                                                             "by Paul Robson v"+MainState.VERSION,
                                                              24);
-        lbl.anchor.x = lbl.anchor.y = 1;lbl.tint = 0;                                                             
+        lbl.anchor.x = 0.5;lbl.anchor.y = 1;lbl.tint = 0xFFFF00;                                                             
 
-        // Load Music in
+        // Load Music in amd convert to object
         var json:any = this.game.cache.getJSON("music");
         this.music = new Music(json);
 
@@ -44,8 +46,10 @@ class MainState extends Phaser.State implements IControllable {
 
         this.barFractionalPosition = 0;
         this.lastFractionalPosition = -1;
-
         this.tempo = this.music.getTempo();
+        
+        // Add the objects - audio metronome, visual metronome, player,
+        // position bar and button array.
         this.audioMetronome = new AudioMetronome(this.game,this.music);
         this.guiMetronome = new VisualMetronome(this.game,this.music);
         this.musicPlayer = new MusicPlayer(this.game,this.music);
