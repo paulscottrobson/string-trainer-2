@@ -4,8 +4,9 @@
     "composer":"classical",
     "instrument":"dulcimer",
     "speed":"120",
+    "subtype":"",
     "title":"waterbound",
-    "translator":"unknown",
+    "translator":"",
     "tuning":"d3,a3,a3",
     "bars":[
         "070009:04;070007:04;040005:04;040005:02;040005:02",

@@ -35,6 +35,9 @@ class Note:
 		if self.qbLength <= 0:
 			raise CompilerException("Note is zero or less length")				
 
+	def getQBLength(self):
+		return self.qbLength 
+		
 	def render(self):
 		return ("".join(["{0:02}".format(x) for x in self.notes]))+(":{0:02}".format(self.qbLength))
 

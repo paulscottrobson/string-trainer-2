@@ -66,11 +66,7 @@ class BaseInstrument:
 		if fret < 0:
 			raise CompilerException("Unknown fretting position '"+self.definition[0]+"'")
 		self.definition = self.definition[1:]
-		return 99 if fret < 0 else fret-1
-
-	# split into individual note units.
-	def getSplitter(self):
-		return " "
+		return 99 if fret == 0 else fret-1
 
 	# convert diatonic offset to chromatic one.
 	def toChromatic(self,diatonic):
@@ -126,10 +122,8 @@ class Dulcimer(BaseInstrument):
 				self.definition = self.definition[1:]
 		return element
 	#
-	#	And we need a default tuning and instrument name and subtype
+	#	And we need an instrument name and subtype
 	#
-	def getDefaultTuning(self):
-		return "d3,a3,d4"
 	def getName(self):
 		return "dulcimer"
 	def getSubtype(self):
