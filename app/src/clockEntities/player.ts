@@ -8,9 +8,11 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
     private tuning:number[];
     private stringSoundIndex:number[];
     private musicOn:boolean;
+    private game:Phaser.Game;
 
     constructor(game:Phaser.Game,music:IMusic) {
         super(music.getBeats());
+        this.game = game;
         this.music = music;
         this.loadNoteSet(game)
         var tuning:string[] = this.music.getTuning();
@@ -29,6 +31,7 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
         this.notes = null;
         this.music = null;
         this.tuning = null;
+        this.game = null;
     }
 
     setVolume(isOn:boolean) : void {
@@ -81,6 +84,7 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
         }
         this.stringSoundIndex[stringID] = noteOffset + 
                                     this.tuning[stringID] - this.baseNoteID + 1;
+        //console.log("Started ",stringID,this.stringSoundIndex[stringID])
         this.notes[this.stringSoundIndex[stringID]].play();
     }
 
@@ -93,6 +97,7 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
     private stopAllNotes(): void {
         for (var n = 0;n < this.stringSoundIndex.length;n++) {
             if (this.stringSoundIndex[n] != Strum.NOSTRUM) {
+                //console.log("Stopped ",n,this.stringSoundIndex[n])
                 this.notes[this.stringSoundIndex[n]].stop();
                 this.stringSoundIndex[n] = Strum.NOSTRUM;
             }

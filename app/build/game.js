@@ -190,6 +190,7 @@ var MusicPlayer = (function (_super) {
     __extends(MusicPlayer, _super);
     function MusicPlayer(game, music) {
         var _this = _super.call(this, music.getBeats()) || this;
+        _this.game = game;
         _this.music = music;
         _this.loadNoteSet(game);
         var tuning = _this.music.getTuning();
@@ -210,6 +211,7 @@ var MusicPlayer = (function (_super) {
         this.notes = null;
         this.music = null;
         this.tuning = null;
+        this.game = null;
     };
     MusicPlayer.prototype.setVolume = function (isOn) {
         this.musicOn = isOn;
@@ -260,6 +262,7 @@ var MusicPlayer = (function (_super) {
         for (var n = 1; n <= soundSet.getNoteCount(); n++) {
             var name = soundSet.getStem() + "-" + (n < 10 ? "0" : "") + n.toString();
             this.notes[n] = game.add.audio(name);
+            this.notes[n].allowMultiple = true;
         }
         this.baseNoteID = this.convertToID(soundSet.getBaseNote());
     };
