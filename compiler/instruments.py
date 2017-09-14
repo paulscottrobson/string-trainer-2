@@ -143,11 +143,14 @@ class Harmonica(BaseInstrument):
 		#print("<"+self.definition+">")
 		if self.definition == "":
 			return None
+		if self.definition[0] == "&":
+			self.definition = self.definition[1:]
+			return 99
 		draw = False
 		if self.definition[0] == "-":
 			draw = True
 			self.definition = self.definition[1:]
-		m = re.match("^([0-9]+)(.*)$",self.definition)
+		m = re.match("^([0-9]+)[/,]?(.*)$",self.definition)
 		if m is None:
 			raise CompilerException("Unknown note '"+self.definition+"'")
 		noteID = int(m.group(1))

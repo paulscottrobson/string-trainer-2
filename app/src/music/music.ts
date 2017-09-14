@@ -84,7 +84,11 @@ class Music implements IMusic {
         if (tuning == "") {
             tuning = this.instrument.getDefaultTuning();
         }
-        return tuning.toLowerCase().split(",");
+        var tuningSet:string[] = tuning.toLowerCase().split(",");
+        while (tuningSet.length < this.instrument.getStringCount()) {
+            tuningSet.push(tuningSet[0]);
+        }
+        return tuningSet;
     }
 
     /**

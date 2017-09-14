@@ -94,10 +94,9 @@ class PositionBar extends Phaser.Group implements IGuiObject {
         // If go off right then loop
         if (xPos > this.spheres[1].getX()) xPos = this.spheres[0].getX();
         // Recalculate position and return.
-        if (xPos != this.spheres[2].getX()) {
+
             barFractionalPosition = this.music.getBarCount() * 
-                                        (xPos-this.xLeft)/(this.xRight-this.xLeft);        
-        }                                        
+                                        (xPos-this.xLeft)/(this.xRight-this.xLeft); 
         return barFractionalPosition;
     }
     

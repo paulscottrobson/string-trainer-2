@@ -2,7 +2,7 @@
 title := ode to joy
 instrument := harmonica
 subtype := diatonic
-tuning := c4,c4,c4
+tuning := c4
 capo := 0
 beats := 4
 speed := 80

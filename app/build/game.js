@@ -418,10 +418,8 @@ var PositionBar = (function (_super) {
         xPos = Math.max(xPos, this.spheres[0].getX());
         if (xPos > this.spheres[1].getX())
             xPos = this.spheres[0].getX();
-        if (xPos != this.spheres[2].getX()) {
-            barFractionalPosition = this.music.getBarCount() *
-                (xPos - this.xLeft) / (this.xRight - this.xLeft);
-        }
+        barFractionalPosition = this.music.getBarCount() *
+            (xPos - this.xLeft) / (this.xRight - this.xLeft);
         return barFractionalPosition;
     };
     PositionBar.prototype.updatePositionsOnDrop = function () {
@@ -512,11 +510,36 @@ var Harmonica = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     Harmonica.prototype.getDefaultTuning = function () {
-        return "c4,c4,c4";
+        return "c4";
     };
     Harmonica.prototype.getStringCount = function () {
         return 3;
     };
+    Harmonica.prototype.getSoundSetDescriptor = function () {
+        return new SoundSet_Harmonica();
+    };
+    Harmonica.prototype.isContinuous = function () {
+        return true;
+    };
+    Harmonica.prototype.toDisplayFret = function (fret) {
+        if (Harmonica.toDisplayConverted == null) {
+            var s = "";
+            for (var _i = 0, _a = Harmonica.TODISPLAY; _i < _a.length; _i++) {
+                var s1 = _a[_i];
+                s = s + " " + s1;
+            }
+            s = s.replace("\t", " ");
+            Harmonica.toDisplayConverted = s.split(" ").filter(function (s) { return (s != ""); });
+        }
+        return Harmonica.toDisplayConverted[fret - 1];
+    };
+    Harmonica.toDisplayConverted = null;
+    Harmonica.TODISPLAY = [
+        "   1   -1b -1  X   2   -2bb  -2b   3   -3bbb  -3bb  -3b    -3",
+        "   4   -4b -4  X   5   -5    X     6   -6b    -6    X      -7",
+        "   7   X   -8  8b  8   -9    9b   9   X       -10   10bb   10b",
+        "   10"
+    ];
     return Harmonica;
 }(StringInstrument));
 var Mandolin = (function (_super) {
@@ -659,7 +682,11 @@ var Music = (function () {
         if (tuning == "") {
             tuning = this.instrument.getDefaultTuning();
         }
-        return tuning.toLowerCase().split(",");
+        var tuningSet = tuning.toLowerCase().split(",");
+        while (tuningSet.length < this.instrument.getStringCount()) {
+            tuningSet.push(tuningSet[0]);
+        }
+        return tuningSet;
     };
     Music.prototype.getInstrumentObject = function (name) {
         var iObj = null;
