@@ -32,17 +32,13 @@ class PreloadState extends Phaser.State {
             this.game.load.bitmapFont(fontName,"assets/fonts/"+fontName+".png",
                                                "assets/fonts/"+fontName+".fnt");
         }
-        // Load instrument notes - hopefully cached after first time.
-        this.preloadSounds(new SoundSet_String());
-        this.preloadSounds(new SoundSet_Harmonica());
 
         // Load metronome sounds
         this.game.load.audio("metronome",["assets/sounds/metronome.mp3",
-                                          "assets/sounds/metronome.ogg"]);
-        // Load the music file.
-        var src:string = StringTrainerApplication.getURLName("music","music.json");
-        this.game.load.json("music",StringTrainerApplication.getURLName("music",src));
+                                          "assets/sounds/metronome.ogg"]);        
 
+        // Analyse music and load sounds
+        this.analyseMusic();                                          
         // Switch to game state when load complete.        
         this.game.load.onLoadComplete.add(() => { this.game.state.start("Main",true,false,1); },this);
     }
@@ -52,13 +48,48 @@ class PreloadState extends Phaser.State {
      * 
      * @private
      * @param {ISoundSet} desc descriptor for those sounds.
+     * @param {Object} toLoad object whose keys specify the number to be loaded.
      * @memberof PreloadState
      */
-    private preloadSounds(desc:ISoundSet) {
-        for (var i:number = 1;i <= desc.getNoteCount();i++) {
+    private preloadSounds(desc:ISoundSet,toLoad:Object) {
+   
+        for (var is in toLoad) {
+            var i:number = parseInt(is,10);
             var sound:string = desc.getStem()+"-"+(i < 10 ? "0":"")+i.toString();
             this.game.load.audio(sound,["assets/sounds/"+sound+".mp3",
                                         "assets/sounds/"+sound+".ogg"]);
         }        
+    }
+
+    /**
+     * Analyses a music object to see which notes it requires and
+     * loads them.
+     * 
+     * @private
+     * @memberof PreloadState
+     */
+    private analyseMusic() : void {
+        // Numbers to load.
+        var used:Object = {}
+        // Load Music in amd convert to object
+        var json:any = this.game.cache.getJSON("music");
+        var music:IMusic = new Music(json);
+        // Get tuning base
+        var tuning:number[] = music.getTuningByID();
+        // Work through all bars, strums and strings to see which notes are played
+        for (var bar:number = 0;bar < music.getBarCount();bar++) {
+            for (var strum:number = 0;strum < music.getBar(bar).getStrumCount();strum++) {
+                var strumDef:IStrum = music.getBar(bar).getStrum(strum);
+                for (var stringID = 0;stringID < strumDef.getStringCount();stringID++) {
+                    var chromOffset = strumDef.getFretPosition(stringID);
+                    if (chromOffset != Strum.NOSTRUM) {
+                        //console.log(chromOffset,tuning[stringID])
+                        used[(chromOffset+tuning[stringID]).toString()] = true
+                    }
+                }
+            }
+        }
+        // And load only those.
+        this.preloadSounds(music.getInstrument().getSoundSetDescriptor(),used);
     }
 }

@@ -9,7 +9,7 @@
  */
 class MainState extends Phaser.State implements IControllable {
 
-    private static VERSION:string="0.91:12/Sep/17";
+    private static VERSION:string="0.92:17/Sep/17 Phaser-CE 2.8.7";
     private renderManager: IRenderManager;
     private audioMetronome:IClockAudioEntity;
     private guiMetronome:IClockEntity;
@@ -32,7 +32,7 @@ class MainState extends Phaser.State implements IControllable {
         var lbl:Phaser.BitmapText = this.game.add.bitmapText(this.game.width/2,this.game.height,
                                                              "font",
                                                              "by Paul Robson v"+MainState.VERSION,
-                                                             24);
+                                                             18);
         lbl.anchor.x = 0.5;lbl.anchor.y = 1;lbl.tint = 0xFFFF00;                                                             
 
         // Load Music in amd convert to object

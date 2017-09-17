@@ -21,7 +21,7 @@ var MainState = (function (_super) {
         var bgr = this.game.add.image(0, 0, "sprites", "background");
         bgr.width = this.game.width;
         bgr.height = this.game.height;
-        var lbl = this.game.add.bitmapText(this.game.width / 2, this.game.height, "font", "by Paul Robson v" + MainState.VERSION, 24);
+        var lbl = this.game.add.bitmapText(this.game.width / 2, this.game.height, "font", "by Paul Robson v" + MainState.VERSION, 18);
         lbl.anchor.x = 0.5;
         lbl.anchor.y = 1;
         lbl.tint = 0xFFFF00;
@@ -102,7 +102,7 @@ var MainState = (function (_super) {
                 break;
         }
     };
-    MainState.VERSION = "0.91:12/Sep/17";
+    MainState.VERSION = "0.92:17/Sep/17 Phaser-CE 2.8.7";
     MainState.BUTTON_LIST = [
         ["P", "i_play"],
         ["H", "i_stop"],
@@ -789,6 +789,8 @@ var BootState = (function (_super) {
     BootState.prototype.preload = function () {
         var _this = this;
         this.game.load.image("loader", "assets/sprites/loader.png");
+        var src = StringTrainerApplication.getURLName("music", "music.json");
+        this.game.load.json("music", StringTrainerApplication.getURLName("music", src));
         this.game.load.onLoadComplete.add(function () { _this.game.state.start("Preload", true, false, 1); }, this);
     };
     BootState.prototype.create = function () {
@@ -816,20 +818,36 @@ var PreloadState = (function (_super) {
             var fontName = _a[_i];
             this.game.load.bitmapFont(fontName, "assets/fonts/" + fontName + ".png", "assets/fonts/" + fontName + ".fnt");
         }
-        this.preloadSounds(new SoundSet_String());
-        this.preloadSounds(new SoundSet_Harmonica());
         this.game.load.audio("metronome", ["assets/sounds/metronome.mp3",
             "assets/sounds/metronome.ogg"]);
-        var src = StringTrainerApplication.getURLName("music", "music.json");
-        this.game.load.json("music", StringTrainerApplication.getURLName("music", src));
+        this.analyseMusic();
         this.game.load.onLoadComplete.add(function () { _this.game.state.start("Main", true, false, 1); }, this);
     };
-    PreloadState.prototype.preloadSounds = function (desc) {
-        for (var i = 1; i <= desc.getNoteCount(); i++) {
+    PreloadState.prototype.preloadSounds = function (desc, toLoad) {
+        for (var is in toLoad) {
+            var i = parseInt(is, 10);
             var sound = desc.getStem() + "-" + (i < 10 ? "0" : "") + i.toString();
             this.game.load.audio(sound, ["assets/sounds/" + sound + ".mp3",
                 "assets/sounds/" + sound + ".ogg"]);
         }
+    };
+    PreloadState.prototype.analyseMusic = function () {
+        var used = {};
+        var json = this.game.cache.getJSON("music");
+        var music = new Music(json);
+        var tuning = music.getTuningByID();
+        for (var bar = 0; bar < music.getBarCount(); bar++) {
+            for (var strum = 0; strum < music.getBar(bar).getStrumCount(); strum++) {
+                var strumDef = music.getBar(bar).getStrum(strum);
+                for (var stringID = 0; stringID < strumDef.getStringCount(); stringID++) {
+                    var chromOffset = strumDef.getFretPosition(stringID);
+                    if (chromOffset != Strum.NOSTRUM) {
+                        used[(chromOffset + tuning[stringID]).toString()] = true;
+                    }
+                }
+            }
+        }
+        this.preloadSounds(music.getInstrument().getSoundSetDescriptor(), used);
     };
     return PreloadState;
 }(Phaser.State));
