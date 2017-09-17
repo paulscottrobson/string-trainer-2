@@ -14,7 +14,17 @@ class StringTrainerApplication extends Phaser.Game {
 
     constructor() {
         // Call the super constructor.
-        super(1280,800,Phaser.AUTO,"",null,false,false);
+        super({
+            enableDebug: false,
+            width:1280,
+            height:800,
+            renderer:Phaser.AUTO,
+            parent:null,
+            transparent: false,            antialias: true
+
+        });
+
+        //1280,800,Phaser.AUTO,"",null,false,false
         // Create a new state and switch to it.
         this.state.add("Boot", new BootState());
         this.state.add("Preload", new PreloadState());

@@ -1,4 +1,2 @@
-Upgrade to latest phaser.
 Fix preload to preload after loading music.
 Render harmonica stuff.
-Mozilla bug - stop doesn't work :(

@@ -20,7 +20,7 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
         this.musicOn = true;
         for (var n:number = 0;n < tuning.length;n++) {
             this.stringSoundIndex[n] = Strum.NOSTRUM;
-            console.log(tuning[n],this.tuning[n]);
+            // console.log(tuning[n],this.tuning[n]);
         }
     }
 

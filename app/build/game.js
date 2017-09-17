@@ -199,7 +199,6 @@ var MusicPlayer = (function (_super) {
         _this.musicOn = true;
         for (var n = 0; n < tuning.length; n++) {
             _this.stringSoundIndex[n] = Strum.NOSTRUM;
-            console.log(tuning[n], _this.tuning[n]);
         }
         return _this;
     }
@@ -761,7 +760,14 @@ window.onload = function () {
 var StringTrainerApplication = (function (_super) {
     __extends(StringTrainerApplication, _super);
     function StringTrainerApplication() {
-        var _this = _super.call(this, 1280, 800, Phaser.AUTO, "", null, false, false) || this;
+        var _this = _super.call(this, {
+            enableDebug: false,
+            width: 1280,
+            height: 800,
+            renderer: Phaser.AUTO,
+            parent: null,
+            transparent: false, antialias: true
+        }) || this;
         _this.state.add("Boot", new BootState());
         _this.state.add("Preload", new PreloadState());
         _this.state.add("Main", new MainState());

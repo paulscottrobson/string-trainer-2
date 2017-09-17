@@ -147,6 +147,7 @@ class Music implements IMusic {
         for (var t of tuning) {
             byID.push(Music.convertToID(t) - baseNoteID - 1);
         }
+        //console.log(byID);
         return byID;
     }
 }
