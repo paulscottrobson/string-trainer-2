@@ -4,7 +4,6 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
 
     private notes:Phaser.Sound[];
     private music:IMusic;
-    private baseNoteID:number;
     private tuning:number[];
     private stringSoundIndex:number[];
     private musicOn:boolean;
@@ -16,13 +15,12 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
         this.music = music;
         this.loadNoteSet(game)
         var tuning:string[] = this.music.getTuning();
-        this.tuning = [];
+        this.tuning = this.music.getTuningByID();
         this.stringSoundIndex = [];
         this.musicOn = true;
         for (var n:number = 0;n < tuning.length;n++) {
-            this.tuning[n] = this.convertToID(tuning[n]);
             this.stringSoundIndex[n] = Strum.NOSTRUM;
-            //console.log(tuning[n],this.tuning[n]);
+            console.log(tuning[n],this.tuning[n]);
         }
     }
 
@@ -82,8 +80,7 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
             this.notes[this.stringSoundIndex[stringID]].stop();
             this.stringSoundIndex[stringID] = Strum.NOSTRUM;
         }
-        this.stringSoundIndex[stringID] = noteOffset + 
-                                    this.tuning[stringID] - this.baseNoteID + 1;
+        this.stringSoundIndex[stringID] = noteOffset +  this.tuning[stringID];
         //console.log("Started ",stringID,this.stringSoundIndex[stringID])
         this.notes[this.stringSoundIndex[stringID]].play();
     }
@@ -117,27 +114,5 @@ class MusicPlayer extends BaseClockEntity implements IClockAudioEntity {
             var name:string = soundSet.getStem()+"-"+(n < 10 ? "0":"")+n.toString();
             this.notes[n] = game.add.audio(name);
         }
-        this.baseNoteID = this.convertToID(soundSet.getBaseNote());
     }
-
-    /**
-     * Convert a string description "C#4" to a chromatic note offset
-     * e.g. C1 is zero.
-     * 
-     * @protected
-     * @param {string} name 
-     * @returns {number} equivalent number.
-     * @memberof MusicPlayer
-     */
-
-    protected convertToID(name:string):number {
-        name = name.toUpperCase();
-        var base:number = MusicPlayer.NOTETOOFFSET[name.substr(0,name.length-1)];
-        base = base + (name.charCodeAt(name.length-1)-49) * 12;
-        return base;
-    }
-
-    private static NOTETOOFFSET:any = { 
-        "C":0,"C#":1,"D":2,"D#":3,"E":4,"F":5,"F#":6,"G":7,"G#":8,"A":9,"A#":10,"B":11
-    };
 }

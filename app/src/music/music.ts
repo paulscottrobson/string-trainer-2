@@ -117,4 +117,36 @@ class Music implements IMusic {
         }
         return iObj;
     }
+
+    /**
+     * Convert a string description "C#4" to a chromatic note offset
+     * e.g. C1 is zero.
+     * 
+     * @protected
+     * @param {string} name 
+     * @returns {number} equivalent number.
+     * @memberof MusicPlayer
+     */
+
+    public static convertToID(name:string):number {
+        name = name.toUpperCase();
+        var base:number = Music.NOTETOOFFSET[name.substr(0,name.length-1)];
+        base = base + (name.charCodeAt(name.length-1)-49) * 12;
+        return base;
+    }
+
+    private static NOTETOOFFSET:any = { 
+        "C":0,"C#":1,"D":2,"D#":3,"E":4,"F":5,"F#":6,"G":7,"G#":8,"A":9,"A#":10,"B":11
+    };
+
+    getTuningByID(): number[] {
+        var tuning:string[] = this.getTuning();
+        var byID:number[] = [];
+        var soundSet:ISoundSet = this.getInstrument().getSoundSetDescriptor();        
+        var baseNoteID = Music.convertToID(soundSet.getBaseNote());
+        for (var t of tuning) {
+            byID.push(Music.convertToID(t) - baseNoteID - 1);
+        }
+        return byID;
+    }
 }

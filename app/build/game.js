@@ -194,12 +194,12 @@ var MusicPlayer = (function (_super) {
         _this.music = music;
         _this.loadNoteSet(game);
         var tuning = _this.music.getTuning();
-        _this.tuning = [];
+        _this.tuning = _this.music.getTuningByID();
         _this.stringSoundIndex = [];
         _this.musicOn = true;
         for (var n = 0; n < tuning.length; n++) {
-            _this.tuning[n] = _this.convertToID(tuning[n]);
             _this.stringSoundIndex[n] = Strum.NOSTRUM;
+            console.log(tuning[n], _this.tuning[n]);
         }
         return _this;
     }
@@ -244,8 +244,7 @@ var MusicPlayer = (function (_super) {
             this.notes[this.stringSoundIndex[stringID]].stop();
             this.stringSoundIndex[stringID] = Strum.NOSTRUM;
         }
-        this.stringSoundIndex[stringID] = noteOffset +
-            this.tuning[stringID] - this.baseNoteID + 1;
+        this.stringSoundIndex[stringID] = noteOffset + this.tuning[stringID];
         this.notes[this.stringSoundIndex[stringID]].play();
     };
     MusicPlayer.prototype.stopAllNotes = function () {
@@ -262,18 +261,7 @@ var MusicPlayer = (function (_super) {
         for (var n = 1; n <= soundSet.getNoteCount(); n++) {
             var name = soundSet.getStem() + "-" + (n < 10 ? "0" : "") + n.toString();
             this.notes[n] = game.add.audio(name);
-            this.notes[n].allowMultiple = true;
         }
-        this.baseNoteID = this.convertToID(soundSet.getBaseNote());
-    };
-    MusicPlayer.prototype.convertToID = function (name) {
-        name = name.toUpperCase();
-        var base = MusicPlayer.NOTETOOFFSET[name.substr(0, name.length - 1)];
-        base = base + (name.charCodeAt(name.length - 1) - 49) * 12;
-        return base;
-    };
-    MusicPlayer.NOTETOOFFSET = {
-        "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11
     };
     return MusicPlayer;
 }(BaseClockEntity));
@@ -710,6 +698,26 @@ var Music = (function () {
                 throw new Error("Not implemented.");
         }
         return iObj;
+    };
+    Music.convertToID = function (name) {
+        name = name.toUpperCase();
+        var base = Music.NOTETOOFFSET[name.substr(0, name.length - 1)];
+        base = base + (name.charCodeAt(name.length - 1) - 49) * 12;
+        return base;
+    };
+    Music.prototype.getTuningByID = function () {
+        var tuning = this.getTuning();
+        var byID = [];
+        var soundSet = this.getInstrument().getSoundSetDescriptor();
+        var baseNoteID = Music.convertToID(soundSet.getBaseNote());
+        for (var _i = 0, tuning_1 = tuning; _i < tuning_1.length; _i++) {
+            var t = tuning_1[_i];
+            byID.push(Music.convertToID(t) - baseNoteID - 1);
+        }
+        return byID;
+    };
+    Music.NOTETOOFFSET = {
+        "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11
     };
     return Music;
 }());

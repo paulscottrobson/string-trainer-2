@@ -116,6 +116,6 @@ compiler = Compiler()
 #compiler.compile(dulcimer,open("waterbound.music"),sys.stdout,sys.stdout)
 compiler.compile(dulcimer,open("waterbound.music"),open("../app/music.json","w"),sys.stdout)
 
-compiler.compile(harmonica,open("love_me_do.harp"),sys.stdout,sys.stdout)
-compiler.compile(harmonica,open("love_me_do.harp"),open("../app/music.json","w"),sys.stdout)
+#compiler.compile(harmonica,open("love_me_do.harp"),sys.stdout,sys.stdout)
+#compiler.compile(harmonica,open("love_me_do.harp"),open("../app/music.json","w"),sys.stdout)
 

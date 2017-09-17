@@ -82,5 +82,14 @@ interface IMusic {
      */
     getTuning():string[];
 
+    /**
+     * Get base ids for tuned play.  For each voice, returns the value that
+     * when added to the chromatic offset gives the number of the sound sample
+     * to load.
+     * 
+     * @returns {number[]} 
+     * @memberof IMusic
+     */
+    getTuningByID(): number[];
 }
 
