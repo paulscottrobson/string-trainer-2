@@ -40,8 +40,7 @@ class MainState extends Phaser.State implements IControllable {
         this.music = new Music(json);
 
         // Create the render manager, which creates the renderers.
-        this.renderManager = new StringRenderManager(this.game,
-                                        this.music.getInstrument(),this.music);
+        this.renderManager = this.music.getInstrument().getRendererFactory().getRenderManager(this.game,this.music.getInstrument(),this.music);
         //this.renderManager.destroy();this.renderManager = null;
 
         this.barFractionalPosition = 0;

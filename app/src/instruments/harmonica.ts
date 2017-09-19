@@ -1,7 +1,7 @@
 /// <reference path="../../lib/phaser.comments.d.ts"/>
 /// <reference path="instrument.ts"/>
 
-class Harmonica extends StringInstrument {
+class Harmonica extends Instrument {
     
     getDefaultTuning(): string {    
         return "c4";
@@ -18,6 +18,10 @@ class Harmonica extends StringInstrument {
 
     isContinuous(): boolean {
         return true;
+    }
+
+    getRendererFactory() : IRendererFactory {
+        return new HarmonicaRendererFactory();
     }
 
     toDisplayFret(fret: number): string {
