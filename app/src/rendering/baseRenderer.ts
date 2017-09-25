@@ -19,12 +19,13 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
     protected bar:IBar;
     protected instrument:IInstrument;
     protected beats:number;
+    protected manager:IRenderManager;
 
     private debugRectangle:Phaser.Image;
     private xiLast:number;
     private yiLast:number;
 
-    private static SHOW_DEBUG:boolean = true;
+    private static SHOW_DEBUG:boolean = false;
 
     abstract moveAllObjects(x:number,y:number): void;
     abstract drawAllObjects(); void;
@@ -41,12 +42,13 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
      * @memberof BaseRenderer
      */
 
-    constructor(game:Phaser.Game,bar:IBar,instrument:IInstrument,width:number,height:number) {
+    constructor(game:Phaser.Game,manager:IRenderManager,bar:IBar,instrument:IInstrument,width:number,height:number) {
         super(game);
         // Mark as not drawn and save information
         this.isDrawn = false;
         this.rWidth = width;this.rHeight = height;
         this.bar = bar;this.instrument = instrument;
+        this.manager = manager;
         this.beats = this.bar.getBeats();
         this.xiLast = this.yiLast = -999999;
         this.debugRectangle = null;
@@ -104,6 +106,7 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
         if (this.debugRectangle != null) {
             this.debugRectangle.destroy();
         }
+        this.manager = null;
         // Finish off.
         super.destroy();
     }

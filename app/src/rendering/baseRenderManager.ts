@@ -25,7 +25,9 @@ abstract class BaseRenderManager extends Phaser.Group implements IRenderManager 
         // Create renderers for each bar
         this.renderers = [];
         for (var bar:number = 0;bar < music.getBarCount();bar++) {
-            var rnd:IRenderer = factory.getRenderer(game,instrument,
+            var rnd:IRenderer = factory.getRenderer(game,
+                                                    this,
+                                                    instrument,
                                                     music.getBar(bar),
                                                     this.getBoxWidth(),
                                                     this.getBoxHeight());

@@ -26,6 +26,7 @@ class Controller extends Phaser.Group implements IController {
                                                    this.buttonInfo[n][1],
                                                    this,this.buttonClicked, 
                                                    this.buttonInfo[n][0]);
+            this.add(button);                                                   
             button.x = button.width * 0.6+xOffset;
             button.y = button.height * 0.6 + yOffset;
             if (alignmentHorizontal) {

@@ -91,6 +91,8 @@ class MainState extends Phaser.State implements IControllable {
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
+                this.game.world.bringToTop(this.controller);
+                this.game.world.bringToTop(this.positionBar);
                 this.lastFractionalPosition = this.barFractionalPosition;
             }
         }

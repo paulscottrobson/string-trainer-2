@@ -17,7 +17,7 @@
    inkscape:export-xdpi="78.510002"
    version="1.1"
    inkscape:export-ydpi="78.510002"
-   inkscape:version="0.92+devel unknown"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    width="100%"
    height="100%">
   <defs
@@ -277,19 +277,6 @@
          style="stop-color:#531c00;stop-opacity:1"
          offset="1" />
     </radialGradient>
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter4326-0"
-       x="-0.012"
-       width="1.024"
-       y="-0.012"
-       height="1.024">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.49999725"
-         id="feGaussianBlur4328-9" />
-    </filter>
     <radialGradient
        id="radialGradient3924-6"
        xlink:href="#linearGradient4423"
@@ -299,6 +286,35 @@
        gradientTransform="matrix(0.97305672,0,0,0.97305672,177.0015,-97.745266)"
        r="68.690002"
        inkscape:collect="always" />
+    <radialGradient
+       r="68.690002"
+       cy="224.28"
+       cx="142.02"
+       gradientTransform="matrix(1.0244465,0,0,1.0244465,355.00589,22.140881)"
+       gradientUnits="userSpaceOnUse"
+       id="radialGradient3037-36"
+       xlink:href="#radialGradient3920-1-7"
+       inkscape:collect="always" />
+    <radialGradient
+       id="radialGradient3920-1-7"
+       gradientUnits="userSpaceOnUse"
+       cy="224.28"
+       cx="142.02"
+       gradientTransform="matrix(1.4074,0,0,1.4074,-59.675,-93.111)"
+       r="68.690002">
+      <stop
+         id="stop3757-7-5"
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0" />
+      <stop
+         id="stop3763-4-3"
+         style="stop-color:#9d009d;stop-opacity:1"
+         offset="0.5" />
+      <stop
+         id="stop3759-0-5"
+         style="stop-color:#53004b;stop-opacity:1"
+         offset="1" />
+    </radialGradient>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -306,8 +322,8 @@
      inkscape:zoom="0.93226623"
      borderopacity="1.0"
      inkscape:current-layer="layer1"
-     inkscape:cx="-0.2681635"
-     inkscape:cy="422.33404"
+     inkscape:cx="-361.75289"
+     inkscape:cy="460.94962"
      inkscape:window-maximized="1"
      showgrid="false"
      fit-margin-right="0"
@@ -316,14 +332,14 @@
      showguides="true"
      bordercolor="#666666"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="27"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      pagecolor="#ffffff"
      inkscape:document-units="px"
-     inkscape:window-height="1016"
+     inkscape:window-height="1029"
      fit-margin-top="0"
      inkscape:document-rotation="0" />
   <g
@@ -414,6 +430,17 @@
        inkscape:export-ydpi="79.220001"
        inkscape:export-xdpi="79.220001"
        inkscape:export-filename="/home/paulr/Projects/string-trainer/graphics/source/sphere_turquoise.png" />
+    <circle
+       r="49.999725"
+       cy="229.46371"
+       cx="527.85437"
+       id="path2985-9-6"
+       style="color:#000000;fill:url(#radialGradient3037-36);stroke-width:0.72790003"
+       inkscape:export-ydpi="79.220001"
+       inkscape:export-filename="/home/paulr/Projects/string-trainer/graphics/source/sphere_purple.png"
+       inkscape:export-xdpi="79.220001"
+       inkscape:transform-center-x="137.29984"
+       inkscape:transform-center-y="26.816374" />
   </g>
   <metadata
      id="metadata58">

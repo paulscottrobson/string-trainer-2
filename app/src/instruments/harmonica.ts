@@ -1,6 +1,16 @@
 /// <reference path="../../lib/phaser.comments.d.ts"/>
 /// <reference path="instrument.ts"/>
 
+/**
+ * Harmonica.
+ * 
+ * Obviously NOT a stringed instrument. So instead we view it as a 3 string
+ * instrument (perhaps should be 4 or 5) as the number of simultaneous notes
+ * each of which can play one of the diatonic notes.
+ * 
+ * @class Harmonica
+ * @extends {Instrument}
+ */
 class Harmonica extends Instrument {
     
     getDefaultTuning(): string {    
@@ -26,6 +36,7 @@ class Harmonica extends Instrument {
 
     toDisplayFret(fret: number): string {
         if (Harmonica.toDisplayConverted == null) {
+            // Converts TODISPLAY static to an array.
             var s:string = "";
             for (var s1 of Harmonica.TODISPLAY) { s = s + " " + s1; }
             s = s.replace("\t"," ");

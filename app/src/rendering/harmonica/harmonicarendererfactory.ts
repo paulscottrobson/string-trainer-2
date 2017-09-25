@@ -12,9 +12,9 @@ class HarmonicaRendererFactory implements IRendererFactory {
         return new HarmonicaRenderManager(game,instrument,music);
     }
     
-    getRenderer(game: Phaser.Game, instrument: IInstrument, 
+    getRenderer(game: Phaser.Game,manager:IRenderManager, instrument: IInstrument, 
                         bar: IBar,width:number, height:number): IRenderer {
-        return new HarmonicaRenderer(game,bar,instrument,width,height);
+        return new HarmonicaRenderer(game,manager,bar,instrument,width,height);
     }
 
 }

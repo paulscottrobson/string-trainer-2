@@ -16,6 +16,7 @@ interface IRendererFactory {
      * Create an object that renders a bar.
      * 
      * @param {Phaser.Game} game 
+     * @param {IRenderManager} manager
      * @param {IInstrument} instrument 
      * @param {IBar} bar 
      * @param {IBar} width
@@ -23,5 +24,5 @@ interface IRendererFactory {
      * @returns {IRenderer} 
      * @memberof IRendererFactory
      */
-    getRenderer(game:Phaser.Game,instrument:IInstrument,bar:IBar,width:number,height:number):IRenderer;
+    getRenderer(game:Phaser.Game,manager:IRenderManager,instrument:IInstrument,bar:IBar,width:number,height:number):IRenderer;
 }

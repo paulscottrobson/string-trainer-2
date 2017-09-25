@@ -12,9 +12,9 @@ class StringRendererFactory implements IRendererFactory {
         return new StringRenderManager(game,instrument,music);
     }
     
-    getRenderer(game: Phaser.Game, instrument: IInstrument, 
+    getRenderer(game: Phaser.Game, manager:IRenderManager,instrument: IInstrument, 
                         bar: IBar,width:number, height:number): IRenderer {
-        return new StringRenderer(game,bar,instrument,width,height);
+        return new StringRenderer(game,manager,bar,instrument,width,height);
     }
 
 }

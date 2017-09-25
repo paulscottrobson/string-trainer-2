@@ -10,7 +10,7 @@ class DraggableSphere {
     private sphere:Phaser.Image;
     
     constructor (game:Phaser.Game,owner:PositionBar,xStart:number,yStart:number,colour:string) {
-        this.sphere = game.add.image(xStart,yStart,"sprites","sphere_"+colour);
+        this.sphere = game.add.image(xStart,yStart,"sprites","sphere_"+colour,owner);
         this.sphere.anchor.x = this.sphere.anchor.y = 0.5;
         this.sphere.height = this.sphere.width = 80;
         this.sphere.inputEnabled = true;

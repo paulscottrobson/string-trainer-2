@@ -33,7 +33,7 @@ class HarmonicaGraphic extends Phaser.Group  {
                     img.width = hWidth;img.height = hHeight;  
                     var txt:Phaser.BitmapText = this.game.add.bitmapText(img.x+hWidth/2,-hHeight*2/3,
                                                                          "font",(n+1).toString(),
-                                                                         hWidth*2/3,this);
+                                                                         hWidth/3,this);
                     txt.anchor.x = 0.5;txt.anchor.y = 1;txt.tint = 0xFF8000;                                                          
                 }
             }
@@ -42,11 +42,11 @@ class HarmonicaGraphic extends Phaser.Group  {
             for (var s:number = -1;s <= 1;s += 2) {
                 var img:Phaser.Image;
                 img = this.game.add.image(0,s*hHeight/2,"sprites","rectangle",this);
-                img.width = count * hWidth+4;img.height = hHeight / 4;
+                img.width = count * hWidth+4;img.height = hHeight / 8;
                 img.anchor.x = 0.5;img.anchor.y = 1-(s+1)/2;img.tint = colour;
                 img = this.game.add.image(s*count/2*hWidth,0,"sprites","rectangle",this);
                 img.anchor.x = 1-(s+1)/2;img.anchor.y = 0.5;
-                img.height = hHeight * 3/2;img.width = hWidth / 4;img.tint = colour;
+                img.height = hHeight * 5/4;img.width = hWidth / 4;img.tint = colour;
                 img = this.game.add.image(s*count/2*hWidth,0,"sprites","rectangle",this);
                 img.anchor.x = 1-(s+1)/2;img.anchor.y = 0.5;
                 img.height = hHeight*2/3;img.width = hWidth;img.tint = colour;

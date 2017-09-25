@@ -64,6 +64,8 @@ var MainState = (function (_super) {
                 this.audioMetronome.updateTime(this.barFractionalPosition);
                 this.guiMetronome.updateTime(this.barFractionalPosition);
                 this.musicPlayer.updateTime(this.barFractionalPosition);
+                this.game.world.bringToTop(this.controller);
+                this.game.world.bringToTop(this.positionBar);
                 this.lastFractionalPosition = this.barFractionalPosition;
             }
         }
@@ -315,6 +317,7 @@ var Controller = (function (_super) {
         _this.keys = [];
         for (var n = 0; n < _this.buttonInfo.length; n++) {
             var button = new PushButton(game, _this.buttonInfo[n][1], _this, _this.buttonClicked, _this.buttonInfo[n][0]);
+            _this.add(button);
             button.x = button.width * 0.6 + xOffset;
             button.y = button.height * 0.6 + yOffset;
             if (alignmentHorizontal) {
@@ -348,7 +351,7 @@ var Controller = (function (_super) {
 }(Phaser.Group));
 var DraggableSphere = (function () {
     function DraggableSphere(game, owner, xStart, yStart, colour) {
-        this.sphere = game.add.image(xStart, yStart, "sprites", "sphere_" + colour);
+        this.sphere = game.add.image(xStart, yStart, "sprites", "sphere_" + colour, owner);
         this.sphere.anchor.x = this.sphere.anchor.y = 0.5;
         this.sphere.height = this.sphere.width = 80;
         this.sphere.inputEnabled = true;
@@ -864,7 +867,7 @@ var BaseRenderManager = (function (_super) {
         var factory = instrument.getRendererFactory();
         _this.renderers = [];
         for (var bar = 0; bar < music.getBarCount(); bar++) {
-            var rnd = factory.getRenderer(game, instrument, music.getBar(bar), _this.getBoxWidth(), _this.getBoxHeight());
+            var rnd = factory.getRenderer(game, _this, instrument, music.getBar(bar), _this.getBoxWidth(), _this.getBoxHeight());
             _this.renderers.push(rnd);
         }
         _this.bouncingBall = _this.game.add.image(100, 100, "sprites", "sphere_red");
@@ -909,13 +912,14 @@ var BaseRenderManager = (function (_super) {
 }(Phaser.Group));
 var BaseRenderer = (function (_super) {
     __extends(BaseRenderer, _super);
-    function BaseRenderer(game, bar, instrument, width, height) {
+    function BaseRenderer(game, manager, bar, instrument, width, height) {
         var _this = _super.call(this, game) || this;
         _this.isDrawn = false;
         _this.rWidth = width;
         _this.rHeight = height;
         _this.bar = bar;
         _this.instrument = instrument;
+        _this.manager = manager;
         _this.beats = _this.bar.getBeats();
         _this.xiLast = _this.yiLast = -999999;
         _this.debugRectangle = null;
@@ -968,6 +972,7 @@ var BaseRenderer = (function (_super) {
         if (this.debugRectangle != null) {
             this.debugRectangle.destroy();
         }
+        this.manager = null;
         _super.prototype.destroy.call(this);
     };
     BaseRenderer.prototype.getXBall = function (fractionalBar) {
@@ -976,7 +981,7 @@ var BaseRenderer = (function (_super) {
     BaseRenderer.prototype.getYBall = function (fractionalBar) {
         return null;
     };
-    BaseRenderer.SHOW_DEBUG = true;
+    BaseRenderer.SHOW_DEBUG = false;
     return BaseRenderer;
 }(Phaser.Group));
 var TestRenderer = (function (_super) {
@@ -1082,7 +1087,7 @@ var HarmonicaGraphic = (function (_super) {
                 var img = _this.game.add.image((n - count / 2) * hWidth, -hHeight / 2, "sprites", "hole", _this);
                 img.width = hWidth;
                 img.height = hHeight;
-                var txt = _this.game.add.bitmapText(img.x + hWidth / 2, -hHeight * 2 / 3, "font", (n + 1).toString(), hWidth * 2 / 3, _this);
+                var txt = _this.game.add.bitmapText(img.x + hWidth / 2, -hHeight * 2 / 3, "font", (n + 1).toString(), hWidth / 3, _this);
                 txt.anchor.x = 0.5;
                 txt.anchor.y = 1;
                 txt.tint = 0xFF8000;
@@ -1093,14 +1098,14 @@ var HarmonicaGraphic = (function (_super) {
             var img;
             img = _this.game.add.image(0, s * hHeight / 2, "sprites", "rectangle", _this);
             img.width = count * hWidth + 4;
-            img.height = hHeight / 4;
+            img.height = hHeight / 8;
             img.anchor.x = 0.5;
             img.anchor.y = 1 - (s + 1) / 2;
             img.tint = colour;
             img = _this.game.add.image(s * count / 2 * hWidth, 0, "sprites", "rectangle", _this);
             img.anchor.x = 1 - (s + 1) / 2;
             img.anchor.y = 0.5;
-            img.height = hHeight * 3 / 2;
+            img.height = hHeight * 5 / 4;
             img.width = hWidth / 4;
             img.tint = colour;
             img = _this.game.add.image(s * count / 2 * hWidth, 0, "sprites", "rectangle", _this);
@@ -1134,11 +1139,79 @@ var HarmonicaRenderer = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     HarmonicaRenderer.prototype.moveAllObjects = function (x, y) {
+        var mgr = (this.manager);
+        var beats = this.bar.getBeats();
+        var vidx = 0;
+        for (var n = this.bar.getStrumCount() - 1; n >= 0; n--) {
+            var strum = this.bar.getStrum(n);
+            for (var str = 0; str < this.instrument.getStringCount(); str++) {
+                var fret = strum.getFretPosition(str);
+                if (fret != Strum.NOSTRUM) {
+                    var note = this.instrument.toDisplayFret(fret);
+                    var hole = Math.abs(parseInt(note.replace("b", ""), 10));
+                    var yc = y + mgr.getBoxHeight();
+                    yc = yc - strum.getStartTime() / (beats * 4) * mgr.getBoxHeight();
+                    this.visList[vidx].x = mgr.getXHole(hole);
+                    this.visList[vidx].y = yc;
+                    var width = (mgr.getXHole(hole + 1) - mgr.getXHole(hole));
+                    var height = mgr.getBoxHeight() * strum.getLength() / (beats * 4);
+                    this.visList[vidx].width = width * 0.9;
+                    this.visList[vidx].height = height * 0.9;
+                    vidx++;
+                }
+            }
+        }
+        this.barMarker.x = this.game.width / 2;
+        this.barMarker.y = y + mgr.getBoxHeight();
     };
     HarmonicaRenderer.prototype.drawAllObjects = function () {
+        this.visList = [];
+        this.barMarker = this.game.add.image(0, 0, "sprites", "bar", this);
+        this.barMarker.rotation = Math.PI / 2;
+        this.barMarker.height = this.rWidth;
+        this.barMarker.width = Math.max(1, this.rHeight / 32);
+        this.barMarker.anchor.x = this.barMarker.anchor.y = 0.5;
+        var beats = this.bar.getBeats();
+        for (var n = this.bar.getStrumCount() - 1; n >= 0; n--) {
+            var strum = this.bar.getStrum(n);
+            for (var str = 0; str < this.instrument.getStringCount(); str++) {
+                var fret = strum.getFretPosition(str);
+                if (fret != Strum.NOSTRUM) {
+                    var disp = this.instrument.toDisplayFret(fret);
+                    var img = this.game.add.image(100, 100, "sprites", disp[0] == "-" ? "drawfrectangle" : "blowfrectangle");
+                    img.tint = this.getObjColour(disp);
+                    img.anchor.x = 0.5;
+                    img.anchor.y = 1;
+                    this.visList.push(img);
+                }
+            }
+        }
     };
     HarmonicaRenderer.prototype.eraseAllObjects = function () {
+        for (var _i = 0, _a = this.visList; _i < _a.length; _i++) {
+            var vis = _a[_i];
+            vis.destroy();
+        }
+        this.barMarker.destroy();
+        this.barMarker = this.visList = null;
     };
+    HarmonicaRenderer.prototype.getObjColour = function (name) {
+        name = name.toUpperCase();
+        var bend = name.length - (name.replace("b", "").length);
+        return name[0] == "-" ? HarmonicaRenderer.DRAW_COLOURS[bend] : HarmonicaRenderer.BLOW_COLOURS[bend];
+    };
+    HarmonicaRenderer.DRAW_COLOURS = [
+        0xFFFF00,
+        0xFF8000,
+        0xFF0000,
+        0xFF00FF
+    ];
+    HarmonicaRenderer.BLOW_COLOURS = [
+        0x00CC00,
+        0x006633,
+        0x004C99,
+        0x0000CC
+    ];
     return HarmonicaRenderer;
 }(BaseRenderer));
 var HarmonicaRendererFactory = (function () {
@@ -1147,8 +1220,8 @@ var HarmonicaRendererFactory = (function () {
     HarmonicaRendererFactory.prototype.getRenderManager = function (game, instrument, music) {
         return new HarmonicaRenderManager(game, instrument, music);
     };
-    HarmonicaRendererFactory.prototype.getRenderer = function (game, instrument, bar, width, height) {
-        return new HarmonicaRenderer(game, bar, instrument, width, height);
+    HarmonicaRendererFactory.prototype.getRenderer = function (game, manager, instrument, bar, width, height) {
+        return new HarmonicaRenderer(game, manager, bar, instrument, width, height);
     };
     return HarmonicaRendererFactory;
 }());
@@ -1167,16 +1240,14 @@ var HarmonicaRenderManager = (function (_super) {
         this.lineGroup = this.game.add.group();
         this.harmonicaGfx = new HarmonicaGraphic(this.game, hSize, holeSize, holeSize);
         this.harmonicaGfx.x = this.game.width / 2;
-        this.harmonicaGfx.y = this.game.height * 4 / 5;
+        this.harmonicaGfx.y = this.game.height * 0.78;
         this.boxWidth = holeSize;
         for (var n = 1; n <= this.getHarmonicaSize() + 1; n++) {
-            var img = this.game.add.image(this.getXTrack(n, 0), 0, "sprites", "rectangle", this.lineGroup);
+            var img = this.game.add.image(this.getXHole(n) - holeSize / 2, 0, "sprites", "rectangle", this.lineGroup);
             img.anchor.x = 0.5;
             img.width = Math.max(1, this.game.width / 512);
             img.height = this.game.height * 5 / 4;
             img.tint = 0x00;
-            var angle = Math.atan2(-this.harmonicaGfx.y - this.harmonicaGfx.getHoleWidth() / 2, this.getXTrack(n, 0) - this.getXTrack(n, this.harmonicaGfx.y));
-            img.rotation = angle - Math.PI * 3 / 2;
         }
     };
     HarmonicaRenderManager.prototype.eraseBackground = function () {
@@ -1189,7 +1260,7 @@ var HarmonicaRenderManager = (function (_super) {
         return this.boxWidth * this.getHarmonicaSize();
     };
     HarmonicaRenderManager.prototype.getBoxHeight = function () {
-        return this.game.height / 1.5;
+        return this.game.height / 2.5;
     };
     HarmonicaRenderManager.prototype.getXBox = function (fracPos, bar) {
         return this.game.width / 2 - this.getBoxWidth() / 2;
@@ -1200,11 +1271,8 @@ var HarmonicaRenderManager = (function (_super) {
     HarmonicaRenderManager.prototype.getHarmonicaSize = function () {
         return 10;
     };
-    HarmonicaRenderManager.prototype.getXTrack = function (hole, y) {
-        var x = this.harmonicaGfx.getXHole(hole) - this.harmonicaGfx.getHoleWidth() / 2;
-        x = x - this.game.width / 2;
-        x = x * (0.5 * y / this.harmonicaGfx.y + 0.5);
-        return x + this.game.width / 2;
+    HarmonicaRenderManager.prototype.getXHole = function (hole) {
+        return this.harmonicaGfx.getXHole(hole);
     };
     return HarmonicaRenderManager;
 }(BaseRenderManager));
@@ -1279,8 +1347,8 @@ var StringRendererFactory = (function () {
     StringRendererFactory.prototype.getRenderManager = function (game, instrument, music) {
         return new StringRenderManager(game, instrument, music);
     };
-    StringRendererFactory.prototype.getRenderer = function (game, instrument, bar, width, height) {
-        return new StringRenderer(game, bar, instrument, width, height);
+    StringRendererFactory.prototype.getRenderer = function (game, manager, instrument, bar, width, height) {
+        return new StringRenderer(game, manager, bar, instrument, width, height);
     };
     return StringRendererFactory;
 }());

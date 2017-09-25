@@ -24,15 +24,14 @@ class HarmonicaRenderManager extends BaseRenderManager {
         this.lineGroup = this.game.add.group();
         this.harmonicaGfx = new HarmonicaGraphic(this.game,hSize,holeSize,holeSize);
         this.harmonicaGfx.x = this.game.width/2;
-        this.harmonicaGfx.y = this.game.height*4/5;
+        this.harmonicaGfx.y = this.game.height*0.78;
         this.boxWidth = holeSize;
         for (var n:number = 1;n <= this.getHarmonicaSize()+1;n++) {
-            var img:Phaser.Image = this.game.add.image(this.getXTrack(n,0),0,"sprites","rectangle",this.lineGroup);
+
+            var img:Phaser.Image = this.game.add.image(this.getXHole(n)-holeSize/2,0,
+                                                        "sprites","rectangle",this.lineGroup);
             img.anchor.x = 0.5;img.width = Math.max(1,this.game.width/512);
             img.height = this.game.height*5/4;img.tint = 0x00;
-            var angle:number = Math.atan2(-this.harmonicaGfx.y-this.harmonicaGfx.getHoleWidth()/2,
-                                          this.getXTrack(n,0)-this.getXTrack(n,this.harmonicaGfx.y));
-            img.rotation = angle - Math.PI*3/2;
             //console.log(n,angle * 360 / (2 * Math.PI),this.getXTrack(n,0),this.getXTrack(n,this.harmonicaGfx.y));                                                      
         }
     }
@@ -49,7 +48,7 @@ class HarmonicaRenderManager extends BaseRenderManager {
     }
 
     getBoxHeight():number {
-        return this.game.height / 1.5;
+        return this.game.height / 2.5;
     }
 
     getXBox(fracPos:number,bar:number) {
@@ -64,10 +63,7 @@ class HarmonicaRenderManager extends BaseRenderManager {
         return 10;
     }
 
-    getXTrack(hole:number,y:number) {
-        var x = this.harmonicaGfx.getXHole(hole) - this.harmonicaGfx.getHoleWidth() / 2;
-        x = x - this.game.width / 2;
-        x = x * (0.5 * y / this.harmonicaGfx.y + 0.5);
-        return x + this.game.width / 2;
+    getXHole(hole:number) {
+        return this.harmonicaGfx.getXHole(hole);
     }
 }
