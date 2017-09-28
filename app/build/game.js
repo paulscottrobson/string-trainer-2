@@ -104,7 +104,7 @@ var MainState = (function (_super) {
                 break;
         }
     };
-    MainState.VERSION = "0.92:17/Sep/17 Phaser-CE 2.8.7";
+    MainState.VERSION = "0.93:28/Sep/17 Phaser-CE 2.8.7";
     MainState.BUTTON_LIST = [
         ["P", "i_play"],
         ["H", "i_stop"],
@@ -436,7 +436,7 @@ var Instrument = (function () {
         return false;
     };
     Instrument.prototype.isLowestPitchAtBottom = function () {
-        return false;
+        return true;
     };
     Instrument.prototype.isDoubleString = function (str) {
         return false;

@@ -1,0 +1,13 @@
+#
+#	Wildwood Flower
+#
+title := wildwood flower
+instrument := mandolin
+subtype := 
+tuning := 
+capo := 0
+beats := 4
+speed := 180
+composer := classical
+
+& & D 4 5 | A 0o 2 5 | D 4o 5 4 | 2o 4 2 | 0o 4 5 | A 0o 2 5

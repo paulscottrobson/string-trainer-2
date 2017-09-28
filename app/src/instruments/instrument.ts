@@ -17,7 +17,7 @@ abstract class Instrument implements IInstrument {
         return false;
     }
     isLowestPitchAtBottom(): boolean {
-        return false;
+        return true;
     }
     isDoubleString(str: number): boolean {
         return false;

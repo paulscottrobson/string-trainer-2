@@ -19,6 +19,11 @@ from note import Note
 class BaseInstrument:
 	def __init__(self,capoPosition = 0):
 		self.capoPosition = 0
+		self.setup()
+
+	# set up routine
+	def setup(self):
+		pass
 
 	# Inverted is normally just the dulcimer - 301 has 3 as the lowest which is the normal.
 	def isInverted(self):
@@ -36,15 +41,11 @@ class BaseInstrument:
 		while self.definition != "" and Note.getModifiers().find(self.definition[-1]) >= 0:
 			modifiers = self.definition[-1]+modifiers 
 			self.definition = self.definition[:-1]
-		# extract note(s) from the rest.
-		notes = []
-		fretting = self.extractNoteElement() 
-		while fretting is not None:
-			if fretting < 99:
-				notes.append(self.convertToChromatic(fretting))
-			else:
-				notes.append(fretting)
-			fretting = self.extractNoteElement()
+		# get a note set from it
+		notes = self.extractNotes()
+		# might just be info e.g. the string switchers on Mandolin
+		if notes is None:
+			return None
 		# make lowest note first.
 		if not self.isInverted():
 			notes.reverse()
@@ -58,6 +59,19 @@ class BaseInstrument:
 		note = Note(notes)
 		note.processModifiers(modifiers)
 		return note
+
+	def extractNotes(self):
+		# extract note(s) from the rest.
+		notes = []
+		fretting = self.extractNoteElement() 
+		while fretting is not None:
+			if fretting != 98:
+				if fretting < 99:
+					notes.append(self.convertToChromatic(fretting))
+				else:
+					notes.append(fretting)
+			fretting = self.extractNoteElement()
+		return notes 
 
 	# extract a note from fretting letters.
 	def extractNoteElement(self):
@@ -130,6 +144,12 @@ class Dulcimer(BaseInstrument):
 	def getSubtype(self):
 		return ""
 
+# ***********************************************************************************************************
+#
+#												Harmonica
+#
+# ***********************************************************************************************************
+
 class Harmonica(BaseInstrument):
 
 	def getName(self):
@@ -162,3 +182,44 @@ class Harmonica(BaseInstrument):
 
 Harmonica.BLOW = [  0, 4, 7,12,16,19,24,28,31,36 ]
 Harmonica.DRAW = [  2, 7,11,14,17,21,23,26,29,33 ]
+
+# ***********************************************************************************************************
+#
+#												Mandolin
+#
+# ***********************************************************************************************************
+
+class Mandolin(BaseInstrument):
+
+	def getName(self):
+		return "mandolin"
+	def getSubtype(self):
+		return ""
+	def getVoices(self):
+		return 4
+
+	def setup(self):
+		self.currentString = 3
+		self.shiftedString = None 
+
+	def extractNotes(self):
+
+		while self.definition != "" and "GDAE".find(self.definition[0]) >= 0:
+			self.currentString = "EADG".find(self.definition[0])
+			self.shiftedString = self.currentString
+			self.definition = self.definition[1:]
+
+		if self.definition == "":
+			return None		
+		if self.definition[0] == '&':
+			self.definition = self.definition[1:]
+			return [99,99,99,99]
+
+		#print("<"+self.definition+">",self.currentString)
+		fret = BaseInstrument.FRETLETTERS.find(self.definition[0])
+		if fret < 0:
+			raise CompilerException("Unknown Fret Position "+self.definition)
+		notes = [ 99 ] * self.getVoices()
+		notes[self.currentString if self.shiftedString is None else self.shiftedString] = fret - 1
+		self.shiftedString = None
+		return notes		

@@ -25,8 +25,9 @@ class Bar:
 				self.labels[len(self.notes)] = noteDef
 			else:
 				note = instrument.createNote(noteDef)
-				self.notes.append(note)
-				qbSize += note.getQBLength();
+				if note is not None:
+					self.notes.append(note)
+					qbSize += note.getQBLength();
 
 	def render(self):
 		render = []
@@ -111,11 +112,14 @@ Compiler.ASSIGNS = { "title":"","instrument":"","subtype":"","tuning":"","capo":
 
 dulcimer = instruments.Dulcimer()	
 harmonica = instruments.Harmonica()
+mandolin = instruments.Mandolin()
 
 compiler = Compiler()
-#compiler.compile(dulcimer,open("waterbound.music"),sys.stdout,sys.stdout)
-compiler.compile(dulcimer,open("waterbound.music"),open("../app/music.json","w"),sys.stdout)
+#compiler.compile(dulcimer,open("waterbound.dulcimer"),sys.stdout,sys.stdout)
+compiler.compile(dulcimer,open("waterbound.dulcimer"),open("../app/music1.json","w"),sys.stdout)
 
 #compiler.compile(harmonica,open("love_me_do.harp"),sys.stdout,sys.stdout)
-compiler.compile(harmonica,open("ode_to_joy.harp"),open("../app/music2.json","w"),sys.stdout)
+compiler.compile(harmonica,open("ode_to_joy.harmonica"),open("../app/music2.json","w"),sys.stdout)
 
+compiler.compile(mandolin,open("wildwood.mandolin"),sys.stdout,sys.stdout)
+compiler.compile(mandolin,open("wildwood.mandolin"),open("../app/music.json","w"),sys.stdout)

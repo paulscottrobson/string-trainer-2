@@ -9,7 +9,7 @@
  */
 class MainState extends Phaser.State implements IControllable {
 
-    private static VERSION:string="0.92:17/Sep/17 Phaser-CE 2.8.7";
+    private static VERSION:string="0.93:28/Sep/17 Phaser-CE 2.8.7";
     private renderManager: IRenderManager;
     private audioMetronome:IClockAudioEntity;
     private guiMetronome:IClockEntity;
