@@ -25,7 +25,7 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
     private xiLast:number;
     private yiLast:number;
 
-    private static SHOW_DEBUG:boolean = false;
+    private static SHOW_DEBUG:boolean = true;
 
     abstract moveAllObjects(x:number,y:number): void;
     abstract drawAllObjects(); void;

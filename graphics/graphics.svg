@@ -11,7 +11,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="svg2"
-   sodipodi:docname="spheres.svg"
+   sodipodi:docname="graphics.svg"
    inkscape:export-filename="C:\Documents and Settings\Administrador.ZOXO-4AA22D202B\Desktop\spheres.png"
    viewBox="0 0 458.56 485.29"
    inkscape:export-xdpi="78.510002"
@@ -319,11 +319,11 @@
   <sodipodi:namedview
      id="base"
      fit-margin-left="0"
-     inkscape:zoom="0.93226623"
+     inkscape:zoom="3.7508723"
      borderopacity="1.0"
      inkscape:current-layer="layer1"
-     inkscape:cx="-361.75289"
-     inkscape:cy="460.94962"
+     inkscape:cx="184.22381"
+     inkscape:cy="92.670809"
      inkscape:window-maximized="1"
      showgrid="false"
      fit-margin-right="0"
@@ -339,7 +339,7 @@
      inkscape:pageshadow="2"
      pagecolor="#ffffff"
      inkscape:document-units="px"
-     inkscape:window-height="1029"
+     inkscape:window-height="1020"
      fit-margin-top="0"
      inkscape:document-rotation="0" />
   <g
@@ -441,6 +441,44 @@
        inkscape:export-xdpi="79.220001"
        inkscape:transform-center-x="137.29984"
        inkscape:transform-center-y="26.816374" />
+    <g
+       id="g3791"
+       transform="rotate(-8.522572,341.83994,408.74442)"
+       inkscape:export-filename="/home/paulr/Projects/string-trainer/graphics/source/minim.png"
+       inkscape:export-xdpi="78.510002"
+       inkscape:export-ydpi="78.510002">
+      <g
+         id="g3786">
+        <ellipse
+           style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.08586276;stroke-opacity:1"
+           id="path3757"
+           cx="341.83994"
+           cy="408.74442"
+           rx="31.15527"
+           ry="21.557503" />
+      </g>
+      <ellipse
+         ry="18.880228"
+         rx="23.108517"
+         cy="408.98593"
+         cx="341.83994"
+         id="path3757-3"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.87518448;stroke-opacity:1" />
+    </g>
+    <g
+       id="g3786-7"
+       transform="rotate(-8.522572,701.31167,-30.639348)"
+       inkscape:export-filename="/home/paulr/Projects/string-trainer/graphics/source/g3786-7.png"
+       inkscape:export-xdpi="78.510002"
+       inkscape:export-ydpi="78.510002">
+      <ellipse
+         ry="21.557503"
+         rx="31.15527"
+         cy="408.74442"
+         cx="341.83994"
+         id="path3757-5"
+         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.08586276;stroke-opacity:1" />
+    </g>
   </g>
   <metadata
      id="metadata58">

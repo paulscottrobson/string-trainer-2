@@ -981,7 +981,7 @@ var BaseRenderer = (function (_super) {
     BaseRenderer.prototype.getYBall = function (fractionalBar) {
         return null;
     };
-    BaseRenderer.SHOW_DEBUG = false;
+    BaseRenderer.SHOW_DEBUG = true;
     return BaseRenderer;
 }(Phaser.Group));
 var TestRenderer = (function (_super) {
@@ -1276,6 +1276,119 @@ var HarmonicaRenderManager = (function (_super) {
     };
     return HarmonicaRenderManager;
 }(BaseRenderManager));
+var BaseStaveRenderManager = (function (_super) {
+    __extends(BaseStaveRenderManager, _super);
+    function BaseStaveRenderManager() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    BaseStaveRenderManager.prototype.getStaveBox = function () {
+        return new Phaser.Rectangle(0, 0, this.getBoxWidth(), this.getBoxHeight());
+    };
+    return BaseStaveRenderManager;
+}(BaseRenderManager));
+var TestStaveRenderManager = (function (_super) {
+    __extends(TestStaveRenderManager, _super);
+    function TestStaveRenderManager() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    TestStaveRenderManager.prototype.getBoxWidth = function () {
+        return this.game.width / 3;
+    };
+    TestStaveRenderManager.prototype.getBoxHeight = function () {
+        return this.game.height / 2;
+    };
+    TestStaveRenderManager.prototype.getXBox = function (fracPos, bar) {
+        return this.game.width / 4 + (-fracPos + bar) * this.getBoxWidth();
+    };
+    TestStaveRenderManager.prototype.getYBox = function (fracPos, bar) {
+        return this.game.height * 4 / 5 - this.getBoxHeight();
+    };
+    TestStaveRenderManager.prototype.getStaveBox = function () {
+        return new Phaser.Rectangle(0, 20, this.getBoxWidth() - 0, this.getBoxHeight() / 2);
+    };
+    TestStaveRenderManager.prototype.drawBackground = function () {
+    };
+    TestStaveRenderManager.prototype.eraseBackground = function () {
+    };
+    return TestStaveRenderManager;
+}(BaseStaveRenderManager));
+var BaseStaveRenderer = (function (_super) {
+    __extends(BaseStaveRenderer, _super);
+    function BaseStaveRenderer(game, manager, bar, instrument, width, height) {
+        var _this = _super.call(this, game, manager, bar, instrument, width, height) || this;
+        _this.stManager = _this.manager;
+        _this.stRect = _this.stManager.getStaveBox();
+        _this.backRect = null;
+        return _this;
+    }
+    BaseStaveRenderer.prototype.moveAllObjects = function (x, y) {
+        this.backRect.x = x + this.stRect.x;
+        this.backRect.y = y + this.stRect.y;
+        for (var i = 0; i < 5; i++) {
+            this.lines[i].x = this.backRect.x;
+            this.lines[i].y = y + this.getYStaveLine(i);
+        }
+        this.barLine.x = this.backRect.x;
+        this.barLine.y = y + this.getYStaveLine(2);
+        _super.prototype.moveAllObjects.call(this, x, y);
+    };
+    BaseStaveRenderer.prototype.getYStaveLine = function (n) {
+        return (4 - 1.5 - n) * this.getStaveSpacing() + this.stRect.halfHeight;
+    };
+    BaseStaveRenderer.prototype.getStaveSpacing = function () {
+        return this.stRect.height / 8;
+    };
+    BaseStaveRenderer.prototype.drawAllObjects = function () {
+        this.backRect = this.game.add.image(0, 0, "sprites", "rectangle");
+        this.backRect.width = this.stRect.width;
+        this.backRect.height = this.stRect.height;
+        this.barLine = this.game.add.image(0, 0, "sprites", "rectangle");
+        this.barLine.width = this.game.width / 160;
+        this.barLine.height = (this.getYStaveLine(0) - this.getYStaveLine(4)) + 4;
+        this.barLine.tint = 0x0;
+        this.barLine.anchor.y = 0.5;
+        this.lines = [];
+        for (var i = 0; i < 5; i++) {
+            this.lines[i] = this.game.add.image(0, 0, "sprites", "rectangle");
+            this.lines[i].width = this.stRect.width;
+            this.lines[i].height = Math.max(2, this.game.height / 160);
+            this.lines[i].anchor.y = 0.5;
+            this.lines[i].tint = 0x000000;
+            if (i == 0)
+                this.lines[i].tint = 0xFF8000;
+        }
+        _super.prototype.drawAllObjects.call(this);
+    };
+    BaseStaveRenderer.prototype.eraseAllObjects = function () {
+        this.backRect.destroy();
+        this.barLine.destroy();
+        for (var _i = 0, _a = this.lines; _i < _a.length; _i++) {
+            var l = _a[_i];
+            l.destroy();
+        }
+        this.backRect = null;
+        this.lines = null;
+        this.barLine = null;
+        _super.prototype.eraseAllObjects.call(this);
+    };
+    return BaseStaveRenderer;
+}(BounceBaseRenderer));
+var TestStaveRenderer = (function (_super) {
+    __extends(TestStaveRenderer, _super);
+    function TestStaveRenderer() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    TestStaveRenderer.prototype.moveAllObjects = function (x, y) {
+        _super.prototype.moveAllObjects.call(this, x, y);
+    };
+    TestStaveRenderer.prototype.drawAllObjects = function () {
+        _super.prototype.drawAllObjects.call(this);
+    };
+    TestStaveRenderer.prototype.eraseAllObjects = function () {
+        _super.prototype.eraseAllObjects.call(this);
+    };
+    return TestStaveRenderer;
+}(BaseStaveRenderer));
 var StringRenderer = (function (_super) {
     __extends(StringRenderer, _super);
     function StringRenderer() {
@@ -1345,10 +1458,10 @@ var StringRendererFactory = (function () {
     function StringRendererFactory() {
     }
     StringRendererFactory.prototype.getRenderManager = function (game, instrument, music) {
-        return new StringRenderManager(game, instrument, music);
+        return new TestStaveRenderManager(game, instrument, music);
     };
     StringRendererFactory.prototype.getRenderer = function (game, manager, instrument, bar, width, height) {
-        return new StringRenderer(game, manager, bar, instrument, width, height);
+        return new TestStaveRenderer(game, manager, bar, instrument, width, height);
     };
     return StringRendererFactory;
 }());
