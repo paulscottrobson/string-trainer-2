@@ -10,8 +10,13 @@ abstract class Instrument implements IInstrument {
 
     abstract getDefaultTuning(): string;
     abstract getStringCount(): number;
-    abstract getRendererFactory():IRendererFactory;
+    abstract getInstrumentRendererFactory():IRendererFactory;
     abstract getSoundSetDescriptor():ISoundSet;
+
+    getRendererFactory(): IRendererFactory {
+        return new TestRendererFactory();
+        //return this.getInstrumentRendererFactory();
+    }
 
     isContinuous():boolean {
         return false;
@@ -36,7 +41,7 @@ abstract class Instrument implements IInstrument {
  */
 abstract class StringInstrument extends Instrument {
 
-    getRendererFactory(): IRendererFactory {
+    getInstrumentRendererFactory(): IRendererFactory {
         return new StringRendererFactory();
     }
     getSoundSetDescriptor():ISoundSet {

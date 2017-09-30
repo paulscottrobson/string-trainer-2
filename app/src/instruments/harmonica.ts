@@ -30,7 +30,7 @@ class Harmonica extends Instrument {
         return true;
     }
 
-    getRendererFactory() : IRendererFactory {
+    getInstrumentRendererFactory() : IRendererFactory {
         return new HarmonicaRendererFactory();
     }
 

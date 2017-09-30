@@ -12,8 +12,8 @@
 abstract class BaseRenderManager extends Phaser.Group implements IRenderManager {
 
     protected renderers:IRenderer[];
-    protected instrument:IInstrument;
-    protected music:IMusic;
+    public instrument:IInstrument;
+    public music:IMusic;
     private   bouncingBall:Phaser.Image;
 
     constructor(game:Phaser.Game,instrument:IInstrument,music:IMusic) {

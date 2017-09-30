@@ -19,7 +19,7 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
     protected bar:IBar;
     protected instrument:IInstrument;
     protected beats:number;
-    protected manager:IRenderManager;
+    protected manager:BaseRenderManager;
 
     private debugRectangle:Phaser.Image;
     private xiLast:number;
@@ -48,7 +48,7 @@ abstract class BaseRenderer extends Phaser.Group implements IRenderer {
         this.isDrawn = false;
         this.rWidth = width;this.rHeight = height;
         this.bar = bar;this.instrument = instrument;
-        this.manager = manager;
+        this.manager = <BaseRenderManager>manager;
         this.beats = this.bar.getBeats();
         this.xiLast = this.yiLast = -999999;
         this.debugRectangle = null;

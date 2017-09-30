@@ -33,8 +33,18 @@ class TestStaveRenderManager extends BaseStaveRenderManager {
     }
     drawBackground(): void {    
     }
-
     eraseBackground(): void {        
     }
+}
 
+class TestRendererFactory implements IRendererFactory {
+    
+    getRenderManager(game:Phaser.Game,instrument:IInstrument,music:IMusic): IRenderManager {
+        return new TestStaveRenderManager(game,instrument,music);
+    }
+    
+    getRenderer(game: Phaser.Game, manager:IRenderManager,instrument: IInstrument, 
+                        bar: IBar,width:number, height:number): IRenderer {
+        return new TestStaveRenderer(game,manager,bar,instrument,width,height);
+    }
 }

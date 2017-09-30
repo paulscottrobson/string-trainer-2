@@ -7,6 +7,7 @@ abstract class BaseStaveRenderer extends BounceBaseRenderer {
     private backRect:Phaser.Image;
     private lines:Phaser.Image[];
     private barLine:Phaser.Image;
+    private noteGraphics:NoteGraphic[];
 
     constructor(game:Phaser.Game,manager:IRenderManager,bar:IBar,instrument:IInstrument,width:number,height:number) {
         super(game,manager,bar,instrument,width,height);        
@@ -22,8 +23,16 @@ abstract class BaseStaveRenderer extends BounceBaseRenderer {
             this.lines[i].x = this.backRect.x;
             this.lines[i].y = y+this.getYStaveLine(i);
         }
-        this.barLine.x = this.backRect.x;
+        this.barLine.x = this.backRect.x + this.stRect.width * 15 / 16;
         this.barLine.y = y+this.getYStaveLine(2);
+
+        for (var n:number = 0;n < this.bar.getStrumCount();n++) {
+            var strum:IStrum = this.bar.getStrum(n);
+            var xPos:number = (strum.getStartTime()) * this.rWidth / (4 * this.beats);            
+            this.noteGraphics[n].x = this.stRect.x + x + xPos;
+            this.noteGraphics[n].y = y+this.getYStaveLine(2);
+        }
+         
         super.moveAllObjects(x,y);
     }
 
@@ -53,13 +62,38 @@ abstract class BaseStaveRenderer extends BounceBaseRenderer {
             this.lines[i].tint = 0x000000;
             if (i == 0) this.lines[i].tint = 0xFF8000;
         }
+
+        var tuning:string[] = this.manager.music.getTuning();
+        var midNote:number = Music.convertToID("B4");
+        this.noteGraphics = [];
+        var beats:number = this.bar.getBeats();
+        for (var n:number = 0;n < this.bar.getStrumCount();n++) {
+            var strum:IStrum = this.bar.getStrum(n);
+            var ng:NoteGraphic = new NoteGraphic(this.game);
+            this.noteGraphics[n] = ng;
+            var isRest:boolean = true;
+            for (var str: number = 0; str < this.instrument.getStringCount(); str++) {
+                var fret: number = strum.getFretPosition(str);
+                if (fret != Strum.NOSTRUM) {
+                    ng.addNote(strum.getFretPosition(str)+Music.convertToID(tuning[str]),
+                                            strum.getLength(),str,this.getStaveSpacing(),midNote);
+                    isRest = false;
+                }
+            }
+            if (isRest) {
+                ng.addRest(strum.getLength(),this.getStaveSpacing());
+            } else {
+                ng.addSpacers(this.getStaveSpacing());
+            }
+        }         
         super.drawAllObjects();
     }
 
     eraseAllObjects() : void {
+        for (var g of this.noteGraphics) { g.destroy(); }
         this.backRect.destroy();this.barLine.destroy();
         for (var l of this.lines) { l.destroy(); }
-        this.backRect = null;this.lines = null;this.barLine = null;
+        this.backRect = null;this.lines = null;this.barLine = null;this.noteGraphics = null;
         super.eraseAllObjects();
     }
  

@@ -432,6 +432,9 @@ var PositionBar = (function (_super) {
 var Instrument = (function () {
     function Instrument() {
     }
+    Instrument.prototype.getRendererFactory = function () {
+        return new TestRendererFactory();
+    };
     Instrument.prototype.isContinuous = function () {
         return false;
     };
@@ -451,7 +454,7 @@ var StringInstrument = (function (_super) {
     function StringInstrument() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    StringInstrument.prototype.getRendererFactory = function () {
+    StringInstrument.prototype.getInstrumentRendererFactory = function () {
         return new StringRendererFactory();
     };
     StringInstrument.prototype.getSoundSetDescriptor = function () {
@@ -514,7 +517,7 @@ var Harmonica = (function (_super) {
     Harmonica.prototype.isContinuous = function () {
         return true;
     };
-    Harmonica.prototype.getRendererFactory = function () {
+    Harmonica.prototype.getInstrumentRendererFactory = function () {
         return new HarmonicaRendererFactory();
     };
     Harmonica.prototype.toDisplayFret = function (fret) {
@@ -544,7 +547,7 @@ var Mandolin = (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     Mandolin.prototype.getDefaultTuning = function () {
-        return "g3,d3,a4,e5";
+        return "g3,d4,a4,e5";
     };
     Mandolin.prototype.getStringCount = function () {
         return 4;
@@ -710,6 +713,9 @@ var Music = (function () {
         base = base + (name.charCodeAt(name.length - 1) - 49) * 12;
         return base;
     };
+    Music.isNoteIDSharp = function (id) {
+        return Music.NOTEISSHARP[id % 12];
+    };
     Music.prototype.getTuningByID = function () {
         var tuning = this.getTuning();
         var byID = [];
@@ -724,6 +730,9 @@ var Music = (function () {
     Music.NOTETOOFFSET = {
         "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11
     };
+    Music.NOTEISSHARP = [
+        false, true, false, true, false, false, true, false, true, false, true, false
+    ];
     return Music;
 }());
 var Strum = (function () {
@@ -1312,6 +1321,17 @@ var TestStaveRenderManager = (function (_super) {
     };
     return TestStaveRenderManager;
 }(BaseStaveRenderManager));
+var TestRendererFactory = (function () {
+    function TestRendererFactory() {
+    }
+    TestRendererFactory.prototype.getRenderManager = function (game, instrument, music) {
+        return new TestStaveRenderManager(game, instrument, music);
+    };
+    TestRendererFactory.prototype.getRenderer = function (game, manager, instrument, bar, width, height) {
+        return new TestStaveRenderer(game, manager, bar, instrument, width, height);
+    };
+    return TestRendererFactory;
+}());
 var BaseStaveRenderer = (function (_super) {
     __extends(BaseStaveRenderer, _super);
     function BaseStaveRenderer(game, manager, bar, instrument, width, height) {
@@ -1328,8 +1348,14 @@ var BaseStaveRenderer = (function (_super) {
             this.lines[i].x = this.backRect.x;
             this.lines[i].y = y + this.getYStaveLine(i);
         }
-        this.barLine.x = this.backRect.x;
+        this.barLine.x = this.backRect.x + this.stRect.width * 15 / 16;
         this.barLine.y = y + this.getYStaveLine(2);
+        for (var n = 0; n < this.bar.getStrumCount(); n++) {
+            var strum = this.bar.getStrum(n);
+            var xPos = (strum.getStartTime()) * this.rWidth / (4 * this.beats);
+            this.noteGraphics[n].x = this.stRect.x + x + xPos;
+            this.noteGraphics[n].y = y + this.getYStaveLine(2);
+        }
         _super.prototype.moveAllObjects.call(this, x, y);
     };
     BaseStaveRenderer.prototype.getYStaveLine = function (n) {
@@ -1357,18 +1383,46 @@ var BaseStaveRenderer = (function (_super) {
             if (i == 0)
                 this.lines[i].tint = 0xFF8000;
         }
+        var tuning = this.manager.music.getTuning();
+        var midNote = Music.convertToID("B4");
+        this.noteGraphics = [];
+        var beats = this.bar.getBeats();
+        for (var n = 0; n < this.bar.getStrumCount(); n++) {
+            var strum = this.bar.getStrum(n);
+            var ng = new NoteGraphic(this.game);
+            this.noteGraphics[n] = ng;
+            var isRest = true;
+            for (var str = 0; str < this.instrument.getStringCount(); str++) {
+                var fret = strum.getFretPosition(str);
+                if (fret != Strum.NOSTRUM) {
+                    ng.addNote(strum.getFretPosition(str) + Music.convertToID(tuning[str]), strum.getLength(), str, this.getStaveSpacing(), midNote);
+                    isRest = false;
+                }
+            }
+            if (isRest) {
+                ng.addRest(strum.getLength(), this.getStaveSpacing());
+            }
+            else {
+                ng.addSpacers(this.getStaveSpacing());
+            }
+        }
         _super.prototype.drawAllObjects.call(this);
     };
     BaseStaveRenderer.prototype.eraseAllObjects = function () {
+        for (var _i = 0, _a = this.noteGraphics; _i < _a.length; _i++) {
+            var g = _a[_i];
+            g.destroy();
+        }
         this.backRect.destroy();
         this.barLine.destroy();
-        for (var _i = 0, _a = this.lines; _i < _a.length; _i++) {
-            var l = _a[_i];
+        for (var _b = 0, _c = this.lines; _b < _c.length; _b++) {
+            var l = _c[_b];
             l.destroy();
         }
         this.backRect = null;
         this.lines = null;
         this.barLine = null;
+        this.noteGraphics = null;
         _super.prototype.eraseAllObjects.call(this);
     };
     return BaseStaveRenderer;
@@ -1389,6 +1443,59 @@ var TestStaveRenderer = (function (_super) {
     };
     return TestStaveRenderer;
 }(BaseStaveRenderer));
+var NoteGraphic = (function (_super) {
+    __extends(NoteGraphic, _super);
+    function NoteGraphic(game) {
+        var _this = _super.call(this, game) || this;
+        _this.lowest = 0;
+        _this.highest = 0;
+        return _this;
+    }
+    NoteGraphic.prototype.addNote = function (note, qbLength, str, spacing, centre) {
+        var offset = this.toWhiteNoteOffset(note) - this.toWhiteNoteOffset(centre);
+        var img = this.game.add.image(0, 0, "sprites", qbLength >= 2 * 4 ? "minim" : "crotchet", this);
+        img.anchor.x = img.anchor.y = 0.5;
+        img.width = spacing * 1.2;
+        img.height = spacing * 0.9;
+        img.y = -offset * spacing / 2;
+        this.lowest = Math.min(this.lowest, offset);
+        this.highest = Math.max(this.highest, offset);
+        if (Music.isNoteIDSharp(note)) {
+            img = this.game.add.image(img.x + spacing * 1.1, img.y, "sprites", "sharp", this);
+            img.anchor.x = 0.5;
+            img.anchor.y = 0.5;
+            img.width = spacing * 0.7;
+            img.height = spacing;
+        }
+    };
+    NoteGraphic.prototype.addSpacers = function (spacing) {
+        for (var p = this.lowest; p <= this.highest; p++) {
+            if (p % 2 == 0) {
+                var l = p / 2;
+                if (Math.abs(l) > 2) {
+                    var img = this.game.add.image(0, -l * spacing, "sprites", "rectangle", this);
+                    img.width = spacing * 2;
+                    img.height = Math.max(1, spacing / 4);
+                    img.anchor.x = img.anchor.y = 0.5;
+                    img.tint = 0x000000;
+                }
+            }
+        }
+    };
+    NoteGraphic.prototype.addRest = function (qbLength, spacing) {
+        var img = this.game.add.image(0, 0, "sprites", qbLength >= 4 ? "rest1" : "rest2", this);
+        img.anchor.x = img.anchor.y = 0.5;
+        img.width = spacing * 3 / 2;
+        img.height = spacing * 3;
+    };
+    NoteGraphic.prototype.toWhiteNoteOffset = function (note) {
+        return Math.floor(note / 12) * 7 + NoteGraphic.BASENOTES[note % 12];
+    };
+    NoteGraphic.BASENOTES = [
+        0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6
+    ];
+    return NoteGraphic;
+}(Phaser.Group));
 var StringRenderer = (function (_super) {
     __extends(StringRenderer, _super);
     function StringRenderer() {
@@ -1458,10 +1565,10 @@ var StringRendererFactory = (function () {
     function StringRendererFactory() {
     }
     StringRendererFactory.prototype.getRenderManager = function (game, instrument, music) {
-        return new TestStaveRenderManager(game, instrument, music);
+        return new StringRenderManager(game, instrument, music);
     };
     StringRendererFactory.prototype.getRenderer = function (game, manager, instrument, bar, width, height) {
-        return new TestStaveRenderer(game, manager, bar, instrument, width, height);
+        return new StringRenderer(game, manager, bar, instrument, width, height);
     };
     return StringRendererFactory;
 }());

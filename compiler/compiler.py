@@ -118,8 +118,8 @@ compiler = Compiler()
 #compiler.compile(dulcimer,open("waterbound.dulcimer"),sys.stdout,sys.stdout)
 compiler.compile(dulcimer,open("waterbound.dulcimer"),open("../app/music1.json","w"),sys.stdout)
 
-#compiler.compile(harmonica,open("love_me_do.harp"),sys.stdout,sys.stdout)
+compiler.compile(harmonica,open("ode_to_joy.harmonica"),sys.stdout,sys.stdout)
 compiler.compile(harmonica,open("ode_to_joy.harmonica"),open("../app/music2.json","w"),sys.stdout)
 
-compiler.compile(mandolin,open("wildwood.mandolin"),sys.stdout,sys.stdout)
+#compiler.compile(mandolin,open("wildwood.mandolin"),sys.stdout,sys.stdout)
 compiler.compile(mandolin,open("wildwood.mandolin"),open("../app/music.json","w"),sys.stdout)

@@ -139,6 +139,28 @@ class Music implements IMusic {
         "C":0,"C#":1,"D":2,"D#":3,"E":4,"F":5,"F#":6,"G":7,"G#":8,"A":9,"A#":10,"B":11
     };
 
+    private static NOTEISSHARP:boolean[] = [
+        false,true,false,true,false,false,true,false,true,false,true,false
+    ];
+
+    /**
+     * Is a note sharp ?
+     * 
+     * @static
+     * @param {number} id note ID
+     * @returns true if it is a sharp
+     * @memberof Music
+     */
+    public static isNoteIDSharp(id:number) {
+        return Music.NOTEISSHARP[id % 12];
+    }
+
+    /**
+     * Get the tuning for this music file as IDs.
+     * 
+     * @returns {number[]} 
+     * @memberof Music
+     */
     getTuningByID(): number[] {
         var tuning:string[] = this.getTuning();
         var byID:number[] = [];

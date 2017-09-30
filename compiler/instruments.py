@@ -176,9 +176,9 @@ class Harmonica(BaseInstrument):
 		noteID = int(m.group(1))
 		self.definition = m.group(2)
 		if draw:
-			return Harmonica.DRAW[noteID-1]+1
+			return Harmonica.DRAW[noteID-1]
 		else:
-			return Harmonica.BLOW[noteID-1]+1
+			return Harmonica.BLOW[noteID-1]
 
 Harmonica.BLOW = [  0, 4, 7,12,16,19,24,28,31,36 ]
 Harmonica.DRAW = [  2, 7,11,14,17,21,23,26,29,33 ]

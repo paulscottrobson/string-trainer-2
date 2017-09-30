@@ -10,7 +10,7 @@
 class Mandolin extends StringInstrument {
 
     getDefaultTuning(): string {
-        return "g3,d3,a4,e5";
+        return "g3,d4,a4,e5";
     }
     getStringCount(): number {
         return 4;

@@ -12,7 +12,7 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="svg2"
    sodipodi:docname="graphics.svg"
-   inkscape:export-filename="C:\Documents and Settings\Administrador.ZOXO-4AA22D202B\Desktop\spheres.png"
+   inkscape:export-filename="/home/paulr/Projects/string-trainer/graphics/source/marker.png"
    viewBox="0 0 458.56 485.29"
    inkscape:export-xdpi="78.510002"
    version="1.1"
@@ -319,13 +319,13 @@
   <sodipodi:namedview
      id="base"
      fit-margin-left="0"
-     inkscape:zoom="3.7508723"
+     inkscape:zoom="2.9636253"
      borderopacity="1.0"
-     inkscape:current-layer="layer1"
-     inkscape:cx="184.22381"
-     inkscape:cy="92.670809"
+     inkscape:current-layer="g85"
+     inkscape:cx="168.37486"
+     inkscape:cy="133.16176"
      inkscape:window-maximized="1"
-     showgrid="false"
+     showgrid="true"
      fit-margin-right="0"
      inkscape:guide-bbox="true"
      inkscape:snap-global="false"
@@ -341,7 +341,11 @@
      inkscape:document-units="px"
      inkscape:window-height="1020"
      fit-margin-top="0"
-     inkscape:document-rotation="0" />
+     inkscape:document-rotation="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid76" />
+  </sodipodi:namedview>
   <g
      id="layer1"
      inkscape:label="Layer 1"
@@ -478,6 +482,35 @@
          cx="341.83994"
          id="path3757-5"
          style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.08586276;stroke-opacity:1" />
+    </g>
+    <g
+       id="g85">
+      <g
+         id="g92"
+         inkscape:export-filename="/home/paulr/Projects/string-trainer/graphics/source/marker.png"
+         inkscape:export-xdpi="78.510002"
+         inkscape:export-ydpi="78.510002">
+        <g
+           id="g86">
+          <circle
+             r="14.861066"
+             cy="368.56851"
+             cx="-154.77168"
+             id="path74"
+             style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1"
+             transform="rotate(-53.515413)" />
+          <path
+             inkscape:connector-curvature="0"
+             id="path78"
+             d="m 193.93787,333.03488 c 20.73835,21.11482 20.73835,21.11482 20.73835,21.11482"
+             style="fill:none;stroke:#000000;stroke-width:1.01779747px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+          <path
+             inkscape:connector-curvature="0"
+             id="path80"
+             d="m 194.03212,354.05545 c 20.54985,-20.92631 20.54985,-20.92631 20.54985,-20.92631"
+             style="fill:none;stroke:#000000;stroke-width:1.01796043px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+        </g>
+      </g>
     </g>
   </g>
   <metadata
