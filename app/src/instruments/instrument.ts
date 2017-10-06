@@ -14,8 +14,8 @@ abstract class Instrument implements IInstrument {
     abstract getSoundSetDescriptor():ISoundSet;
 
     getRendererFactory(): IRendererFactory {
-        return new TestRendererFactory();
-        //return this.getInstrumentRendererFactory();
+        //return new TestRendererFactory();
+        return this.getInstrumentRendererFactory();
     }
 
     isContinuous():boolean {

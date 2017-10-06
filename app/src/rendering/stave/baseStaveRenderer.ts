@@ -64,26 +64,26 @@ abstract class BaseStaveRenderer extends BounceBaseRenderer {
         }
 
         var tuning:string[] = this.manager.music.getTuning();
-        var midNote:number = Music.convertToID("B4");
+        var midNote:number = Music.convertToID(this.getCentreLineNote());
+
         this.noteGraphics = [];
         var beats:number = this.bar.getBeats();
         for (var n:number = 0;n < this.bar.getStrumCount();n++) {
             var strum:IStrum = this.bar.getStrum(n);
-            var ng:NoteGraphic = new NoteGraphic(this.game);
+            var ng:NoteGraphic = new NoteGraphic(this.game,strum.getLength(),this.getStaveSpacing());
             this.noteGraphics[n] = ng;
             var isRest:boolean = true;
             for (var str: number = 0; str < this.instrument.getStringCount(); str++) {
                 var fret: number = strum.getFretPosition(str);
                 if (fret != Strum.NOSTRUM) {
-                    ng.addNote(strum.getFretPosition(str)+Music.convertToID(tuning[str]),
-                                            strum.getLength(),str,this.getStaveSpacing(),midNote);
+                    ng.addNote(strum.getFretPosition(str)+Music.convertToID(tuning[str]),str,midNote);
                     isRest = false;
                 }
             }
             if (isRest) {
-                ng.addRest(strum.getLength(),this.getStaveSpacing());
+                ng.addRest();
             } else {
-                ng.addSpacers(this.getStaveSpacing());
+                ng.addSpacers();
             }
         }         
         super.drawAllObjects();
@@ -97,6 +97,9 @@ abstract class BaseStaveRenderer extends BounceBaseRenderer {
         super.eraseAllObjects();
     }
  
+    getCentreLineNote(): string {
+        return "B3";
+    }
 }
 
 class TestStaveRenderer extends BaseStaveRenderer {

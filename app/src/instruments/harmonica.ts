@@ -42,7 +42,7 @@ class Harmonica extends Instrument {
             s = s.replace("\t"," ");
             Harmonica.toDisplayConverted = s.split(" ").filter(function(s) {return (s != "");})            
         }
-        return Harmonica.toDisplayConverted[fret-1];
+        return Harmonica.toDisplayConverted[fret];
     }
 
     private static toDisplayConverted:string[] = null;

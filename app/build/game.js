@@ -433,7 +433,7 @@ var Instrument = (function () {
     function Instrument() {
     }
     Instrument.prototype.getRendererFactory = function () {
-        return new TestRendererFactory();
+        return this.getInstrumentRendererFactory();
     };
     Instrument.prototype.isContinuous = function () {
         return false;
@@ -530,7 +530,7 @@ var Harmonica = (function (_super) {
             s = s.replace("\t", " ");
             Harmonica.toDisplayConverted = s.split(" ").filter(function (s) { return (s != ""); });
         }
-        return Harmonica.toDisplayConverted[fret - 1];
+        return Harmonica.toDisplayConverted[fret];
     };
     Harmonica.toDisplayConverted = null;
     Harmonica.TODISPLAY = [
@@ -990,7 +990,7 @@ var BaseRenderer = (function (_super) {
     BaseRenderer.prototype.getYBall = function (fractionalBar) {
         return null;
     };
-    BaseRenderer.SHOW_DEBUG = true;
+    BaseRenderer.SHOW_DEBUG = false;
     return BaseRenderer;
 }(Phaser.Group));
 var TestRenderer = (function (_super) {
@@ -1384,26 +1384,26 @@ var BaseStaveRenderer = (function (_super) {
                 this.lines[i].tint = 0xFF8000;
         }
         var tuning = this.manager.music.getTuning();
-        var midNote = Music.convertToID("B4");
+        var midNote = Music.convertToID(this.getCentreLineNote());
         this.noteGraphics = [];
         var beats = this.bar.getBeats();
         for (var n = 0; n < this.bar.getStrumCount(); n++) {
             var strum = this.bar.getStrum(n);
-            var ng = new NoteGraphic(this.game);
+            var ng = new NoteGraphic(this.game, strum.getLength(), this.getStaveSpacing());
             this.noteGraphics[n] = ng;
             var isRest = true;
             for (var str = 0; str < this.instrument.getStringCount(); str++) {
                 var fret = strum.getFretPosition(str);
                 if (fret != Strum.NOSTRUM) {
-                    ng.addNote(strum.getFretPosition(str) + Music.convertToID(tuning[str]), strum.getLength(), str, this.getStaveSpacing(), midNote);
+                    ng.addNote(strum.getFretPosition(str) + Music.convertToID(tuning[str]), str, midNote);
                     isRest = false;
                 }
             }
             if (isRest) {
-                ng.addRest(strum.getLength(), this.getStaveSpacing());
+                ng.addRest();
             }
             else {
-                ng.addSpacers(this.getStaveSpacing());
+                ng.addSpacers();
             }
         }
         _super.prototype.drawAllObjects.call(this);
@@ -1425,6 +1425,9 @@ var BaseStaveRenderer = (function (_super) {
         this.noteGraphics = null;
         _super.prototype.eraseAllObjects.call(this);
     };
+    BaseStaveRenderer.prototype.getCentreLineNote = function () {
+        return "B3";
+    };
     return BaseStaveRenderer;
 }(BounceBaseRenderer));
 var TestStaveRenderer = (function (_super) {
@@ -1445,48 +1448,50 @@ var TestStaveRenderer = (function (_super) {
 }(BaseStaveRenderer));
 var NoteGraphic = (function (_super) {
     __extends(NoteGraphic, _super);
-    function NoteGraphic(game) {
+    function NoteGraphic(game, length, spacing) {
         var _this = _super.call(this, game) || this;
         _this.lowest = 0;
         _this.highest = 0;
+        _this.qbLength = length;
+        _this.spacing = spacing;
         return _this;
     }
-    NoteGraphic.prototype.addNote = function (note, qbLength, str, spacing, centre) {
+    NoteGraphic.prototype.addNote = function (note, str, centre) {
         var offset = this.toWhiteNoteOffset(note) - this.toWhiteNoteOffset(centre);
-        var img = this.game.add.image(0, 0, "sprites", qbLength >= 2 * 4 ? "minim" : "crotchet", this);
+        var img = this.game.add.image(0, 0, "sprites", this.qbLength >= 2 * 4 ? "minim" : "crotchet", this);
         img.anchor.x = img.anchor.y = 0.5;
-        img.width = spacing * 1.2;
-        img.height = spacing * 0.9;
-        img.y = -offset * spacing / 2;
+        img.width = this.spacing * 1.2;
+        img.height = this.spacing * 0.9;
+        img.y = -offset * this.spacing / 2;
         this.lowest = Math.min(this.lowest, offset);
         this.highest = Math.max(this.highest, offset);
         if (Music.isNoteIDSharp(note)) {
-            img = this.game.add.image(img.x + spacing * 1.1, img.y, "sprites", "sharp", this);
+            img = this.game.add.image(img.x - this.spacing * 1.1, img.y, "sprites", "sharp", this);
             img.anchor.x = 0.5;
             img.anchor.y = 0.5;
-            img.width = spacing * 0.7;
-            img.height = spacing;
+            img.width = this.spacing * 0.7;
+            img.height = this.spacing;
         }
     };
-    NoteGraphic.prototype.addSpacers = function (spacing) {
+    NoteGraphic.prototype.addSpacers = function () {
         for (var p = this.lowest; p <= this.highest; p++) {
             if (p % 2 == 0) {
                 var l = p / 2;
                 if (Math.abs(l) > 2) {
-                    var img = this.game.add.image(0, -l * spacing, "sprites", "rectangle", this);
-                    img.width = spacing * 2;
-                    img.height = Math.max(1, spacing / 4);
+                    var img = this.game.add.image(0, -l * this.spacing, "sprites", "rectangle", this);
+                    img.width = this.spacing * 2;
+                    img.height = Math.max(1, this.spacing / 4);
                     img.anchor.x = img.anchor.y = 0.5;
                     img.tint = 0x000000;
                 }
             }
         }
     };
-    NoteGraphic.prototype.addRest = function (qbLength, spacing) {
-        var img = this.game.add.image(0, 0, "sprites", qbLength >= 4 ? "rest1" : "rest2", this);
+    NoteGraphic.prototype.addRest = function () {
+        var img = this.game.add.image(0, 0, "sprites", this.qbLength >= 4 ? "rest1" : "rest2", this);
         img.anchor.x = img.anchor.y = 0.5;
-        img.width = spacing * 3 / 2;
-        img.height = spacing * 3;
+        img.width = this.spacing * 3 / 2;
+        img.height = this.spacing * 3;
     };
     NoteGraphic.prototype.toWhiteNoteOffset = function (note) {
         return Math.floor(note / 12) * 7 + NoteGraphic.BASENOTES[note % 12];
