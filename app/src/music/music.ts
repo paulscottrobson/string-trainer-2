@@ -167,7 +167,7 @@ class Music implements IMusic {
         var soundSet:ISoundSet = this.getInstrument().getSoundSetDescriptor();        
         var baseNoteID = Music.convertToID(soundSet.getBaseNote());
         for (var t of tuning) {
-            byID.push(Music.convertToID(t) - baseNoteID - 1);
+            byID.push(Music.convertToID(t) - baseNoteID + 1);
         }
         //console.log(byID);
         return byID;

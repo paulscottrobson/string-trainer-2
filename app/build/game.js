@@ -723,7 +723,7 @@ var Music = (function () {
         var baseNoteID = Music.convertToID(soundSet.getBaseNote());
         for (var _i = 0, tuning_1 = tuning; _i < tuning_1.length; _i++) {
             var t = tuning_1[_i];
-            byID.push(Music.convertToID(t) - baseNoteID - 1);
+            byID.push(Music.convertToID(t) - baseNoteID + 1);
         }
         return byID;
     };
